@@ -6,83 +6,11 @@
 /// info@sg6671.com.ar
 ///
 
+#definde GLUT_DISABLE_ATEXIT_HACK
 #include <GL/glut.h>
 #include <math.h>
 #include <cstdlib>
 #include "parametricfunctions.h"
-
-void DrawCylinder(){
-	float* punto=new float[3];
-	float ratio=2;
-	float altura=10;
-	//cantPuntos sirve para determinar cantidad de lados
-	int cantPuntos=15;
-	float posBase=0;
-	int cantBandas=20;
-	glDisable(GL_LIGHTING);
-
-	glBegin(GL_TRIANGLE_STRIP);
-	//glColor3f(1.0, 1.0, 1.0);
-	for(int j=0;j<cantBandas;j++){
-		glColor3f(1.0, 0.0, 0.0);
-		for(int i=0;i<(cantPuntos+1);i++) {
-			if(i==(cantPuntos+1)/3){
-				glColor3f(0.0, 0.0, 1.0);
-			} else {
-				if(i==((cantPuntos+1)/3)*2)
-					glColor3f(0.0, 1.0, 0.0);
-
-			};
-			CylinderPoints(punto,ratio,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos), posBase+(j*(altura/cantBandas)));
-			glVertex3fv(punto);
-
-			CylinderPoints(punto,ratio,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos),posBase+((j+1)*(altura/cantBandas)));
-			glVertex3fv(punto);
-		};
-	};
-
-	glEnd();
-	//Tapa superior
-	glBegin(GL_TRIANGLE_STRIP);
-	glColor3f(1.0, 0.0, 0.0);
-	for(int i=0;i<(cantPuntos+1);i++) {
-		if(i==(cantPuntos+1)/3){
-			glColor3f(0.0, 0.0, 1.0);
-		} else {
-			if(i==((cantPuntos+1)/3)*2)
-				glColor3f(0.0, 1.0, 0.0);
-
-		};
-		CylinderPoints(punto,ratio,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos), posBase+altura);
-		glVertex3fv(punto);
-
-		CylinderPoints(punto,0,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos),posBase+altura);
-		glVertex3fv(punto);
-	};
-	glEnd();
-//tapa inferior
-	glBegin(GL_TRIANGLE_STRIP);
-	glColor3f(1.0, 0.0, 0.0);
-	for(int i=0;i<(cantPuntos+1);i++) {
-		if(i==(cantPuntos+1)/3){
-			glColor3f(0.0, 0.0, 1.0);
-		} else {
-			if(i==((cantPuntos+1)/3)*2)
-				glColor3f(0.0, 1.0, 0.0);
-		};
-		CylinderPoints(punto,ratio,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos), posBase);
-		glVertex3fv(punto);
-		CylinderPoints(punto,0,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos),posBase);
-		glVertex3fv(punto);
-	};
-	glEnd();
-	glEnable(GL_LIGHTING);
-	delete(punto);
-
-}
-
-
-
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
 float eye[3] = {15.0, 15.0, 5.0};
@@ -257,8 +185,6 @@ void display(void)
 	//
 	// Draw here
 	//
-	glPointSize(1.5);
-	DrawCylinder();
 	
 
 
