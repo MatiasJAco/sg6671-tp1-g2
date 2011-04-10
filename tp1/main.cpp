@@ -6,7 +6,7 @@
 /// info@sg6671.com.ar
 ///
 
-#definde GLUT_DISABLE_ATEXIT_HACK
+#define GLUT_DISABLE_ATEXIT_HACK
 #include <GL/glut.h>
 #include <math.h>
 #include <cstdlib>
