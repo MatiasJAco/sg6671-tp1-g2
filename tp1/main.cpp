@@ -5,9 +5,83 @@
 ///
 /// info@sg6671.com.ar
 ///
-#define GLUT_DISABLE_ATEXIT_HACK
+
 #include <GL/glut.h>
 #include <math.h>
+#include <cstdlib>
+#include "parametricfunctions.h"
+
+void DrawCylinder(){
+	float* punto=new float[3];
+	float ratio=2;
+	float altura=10;
+	//cantPuntos sirve para determinar cantidad de lados
+	int cantPuntos=15;
+	float posBase=0;
+	int cantBandas=20;
+	glDisable(GL_LIGHTING);
+
+	glBegin(GL_TRIANGLE_STRIP);
+	//glColor3f(1.0, 1.0, 1.0);
+	for(int j=0;j<cantBandas;j++){
+		glColor3f(1.0, 0.0, 0.0);
+		for(int i=0;i<(cantPuntos+1);i++) {
+			if(i==(cantPuntos+1)/3){
+				glColor3f(0.0, 0.0, 1.0);
+			} else {
+				if(i==((cantPuntos+1)/3)*2)
+					glColor3f(0.0, 1.0, 0.0);
+
+			};
+			CylinderPoints(punto,ratio,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos), posBase+(j*(altura/cantBandas)));
+			glVertex3fv(punto);
+
+			CylinderPoints(punto,ratio,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos),posBase+((j+1)*(altura/cantBandas)));
+			glVertex3fv(punto);
+		};
+	};
+
+	glEnd();
+	//Tapa superior
+	glBegin(GL_TRIANGLE_STRIP);
+	glColor3f(1.0, 0.0, 0.0);
+	for(int i=0;i<(cantPuntos+1);i++) {
+		if(i==(cantPuntos+1)/3){
+			glColor3f(0.0, 0.0, 1.0);
+		} else {
+			if(i==((cantPuntos+1)/3)*2)
+				glColor3f(0.0, 1.0, 0.0);
+
+		};
+		CylinderPoints(punto,ratio,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos), posBase+altura);
+		glVertex3fv(punto);
+
+		CylinderPoints(punto,0,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos),posBase+altura);
+		glVertex3fv(punto);
+	};
+	glEnd();
+//tapa inferior
+	glBegin(GL_TRIANGLE_STRIP);
+	glColor3f(1.0, 0.0, 0.0);
+	for(int i=0;i<(cantPuntos+1);i++) {
+		if(i==(cantPuntos+1)/3){
+			glColor3f(0.0, 0.0, 1.0);
+		} else {
+			if(i==((cantPuntos+1)/3)*2)
+				glColor3f(0.0, 1.0, 0.0);
+		};
+		CylinderPoints(punto,ratio,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos), posBase);
+		glVertex3fv(punto);
+		CylinderPoints(punto,0,((2*M_PI)/cantPuntos)+i*((2*M_PI)/cantPuntos),posBase);
+		glVertex3fv(punto);
+	};
+	glEnd();
+	glEnable(GL_LIGHTING);
+	delete(punto);
+
+}
+
+
 
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
@@ -119,7 +193,7 @@ void DrawXYGrid()
 }
 void Set3DEnv()
 {
-	glViewport (0, 0, (GLsizei) W_WIDTH, (GLsizei) W_HEIGHT);
+	glViewport (0, 0, (GLsizei) W_WIDTH, (GLsizei) W_HEIGHT); 
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
     gluPerspective(60.0, (GLfloat) W_WIDTH/(GLfloat) W_HEIGHT, 0.10, 100.0);
@@ -127,14 +201,14 @@ void Set3DEnv()
 
 void SetPanelTopEnv()
 {
-	glViewport (TOP_VIEW_POSX, TOP_VIEW_POSY, (GLsizei) TOP_VIEW_W, (GLsizei) TOP_VIEW_H);
+	glViewport (TOP_VIEW_POSX, TOP_VIEW_POSY, (GLsizei) TOP_VIEW_W, (GLsizei) TOP_VIEW_H); 
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
 	gluOrtho2D(-0.10, 1.05, -0.10, 1.05);
 }
 
 
-void init(void)
+void init(void) 
 {
 	dl_handle = glGenLists(3);
 
@@ -170,10 +244,10 @@ void display(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt (eye[0], eye[1], eye[2], at[0], at[1], at[2], up[0], up[1], up[2]);
-
+   
 	if (view_axis)
 		 glCallList(DL_AXIS);
-
+	
 	if (view_grid)
 		 glCallList(DL_GRID);
 	//
@@ -183,10 +257,9 @@ void display(void)
 	//
 	// Draw here
 	//
-
-
-
-
+	glPointSize(1.5);
+	DrawCylinder();
+	
 
 
 	//
@@ -205,8 +278,8 @@ void display(void)
 	}
 	//
 	///////////////////////////////////////////////////
-
-
+	
+	
 
 	glutSwapBuffers();
 }
@@ -224,12 +297,12 @@ void keyboard (unsigned char key, int x, int y)
          exit(0);
          break;
 
-	  case 'g':
+	  case 'u':
 		  view_grid = !view_grid;
 		  glutPostRedisplay();
 		  break;
 
-	  case 'a':
+	  case 'r':
 		  view_axis = !view_axis;
 		  glutPostRedisplay();
 		  break;
@@ -255,9 +328,9 @@ void keyboard (unsigned char key, int x, int y)
 		  break;
 
 	  case '3':
-		  eye[0] = 15.0;
-		  eye[1] = 15.0;
-		  eye[2] = 5.0;
+		  eye[0] = 6.0;
+		  eye[1] = 6.0;
+		  eye[2] = 2.0;
 
 		  at[0] = 0.0;
 		  at[1] = 0.0;
@@ -266,6 +339,79 @@ void keyboard (unsigned char key, int x, int y)
 		  up[0] = 0.0;
 		  up[1] = 0.0;
 		  up[2] = 1.0;
+		  glutPostRedisplay();
+		  break;
+
+	case 'w':
+		eye[0]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 's':
+		eye[0]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'a':
+		eye[1]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'd':
+		eye[1]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'z':
+		eye[2]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'x':
+		eye[2]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 't':
+		at[0]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'g':
+		at[0]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'f':
+		at[1]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'h':
+		at[1]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'c':
+		at[2]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'v':
+		at[2]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'i':
+		up[0]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'k':
+		up[0]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'j':
+		up[1]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'l':
+		up[1]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'n':
+		up[2]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'm':
+		up[2]+=1;
 		  glutPostRedisplay();
 		  break;
      default:
@@ -277,13 +423,13 @@ int main(int argc, char** argv)
 {
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize (1024, 768);
+   glutInitWindowSize (1024, 768); 
    glutInitWindowPosition (0, 0);
-
+   
    glutCreateWindow (argv[0]);
    glutFullScreen();
    init ();
-   glutDisplayFunc(display);
+   glutDisplayFunc(display); 
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
    glutIdleFunc(OnIdle);
