@@ -11,6 +11,11 @@
 #include <math.h>
 #include <cstdlib>
 #include "parametricfunctions.h"
+#include "globals.h"
+#include "cylinder.h"
+
+using namespace std;
+
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
 float eye[3] = {15.0, 15.0, 5.0};
@@ -138,8 +143,15 @@ void SetPanelTopEnv()
 
 void init(void) 
 {
-	dl_handle = glGenLists(3);
+	float distancias_rueda_grande[]={1,3/7.0,5/7.0};
 
+	dl_handle = glGenLists(3);
+	cilindro_base=glGenLists(1);
+	pieza_rueda_chica=glGenLists(1);
+	pieza_rueda_grande=glGenLists(1);
+	rueda_chica=glGenLists(1);
+	rueda_grande=glGenLists(1);
+	
 	glClearColor (0.02f, 0.02f, 0.04f, 0.0f);
     glShadeModel (GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
@@ -159,8 +171,23 @@ void init(void)
 	glNewList(DL_AXIS2D_TOP, GL_COMPILE);
 		DrawAxis2DTopView();
 	glEndList();
-}
 
+/*Arranco a Cargar las ruedas*/
+
+
+	glNewList(cilindro_base, GL_COMPILE);
+		DrawCylinder(33);
+	glEndList();
+	
+	glNewList(pieza_rueda_grande, GL_COMPILE);
+		DrawPieza(15,15,distancias_rueda_grande,3);
+	glEndList();
+
+	glNewList(rueda_grande, GL_COMPILE);
+		DrawWheel(15,pieza_rueda_grande);
+	glEndList();
+
+}
 
 
 void display(void)
@@ -184,10 +211,8 @@ void display(void)
     ///////////////////////////////////////////////////
 	//
 	// Draw here
-	//
-	
-
-
+	//	
+		glCallList(rueda_grande);
 	//
 	///////////////////////////////////////////////////
 
