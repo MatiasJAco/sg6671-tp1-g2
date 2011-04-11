@@ -12,7 +12,4 @@
 
 void SpherePoints(float* coordinates,float ratio, float theta,float phi);
 void CylinderPoints(float* coordinates,float ratio, float phi, float coorz);
-
-
-
 #endif /* SPHEREFUNCTION_H_ */
