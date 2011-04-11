@@ -144,7 +144,7 @@ void SetPanelTopEnv()
 void init(void) 
 {
 	float distancias_rueda_grande[]={1,3/7.0,5/7.0};
-
+//Asigno indices a las listas
 	dl_handle = glGenLists(3);
 	cilindro_base=glGenLists(1);
 	pieza_rueda_chica=glGenLists(1);
@@ -161,7 +161,7 @@ void init(void)
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHTING);
 
-	// Generación de las Display Lists
+// Generación de las Display Lists
 	glNewList(DL_AXIS, GL_COMPILE);
 		DrawAxis();
 	glEndList();
@@ -212,6 +212,9 @@ void display(void)
 	//
 	// Draw here
 	//	
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+		glColor3f(1, 0, 0);
 		glCallList(rueda_grande);
 	//
 	///////////////////////////////////////////////////
