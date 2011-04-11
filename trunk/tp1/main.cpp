@@ -13,7 +13,7 @@
 #include "parametricfunctions.h"
 #include "globals.h"
 #include "cylinder.h"
-
+#include <iostream>
 using namespace std;
 
 
@@ -144,6 +144,7 @@ void SetPanelTopEnv()
 void init(void) 
 {
 	float distancias_rueda_grande[]={1,3/7.0,5/7.0};
+	float distancias_rueda_chica[]={1,1/2.0};
 //Asigno indices a las listas
 	dl_handle = glGenLists(3);
 	cilindro_base=glGenLists(1);
@@ -180,13 +181,20 @@ void init(void)
 	glEndList();
 	
 	glNewList(pieza_rueda_grande, GL_COMPILE);
-		DrawPieza(15,15,distancias_rueda_grande,3);
+		DrawPieza(15,15,1,distancias_rueda_grande,3);
 	glEndList();
 
 	glNewList(rueda_grande, GL_COMPILE);
 		DrawWheel(15,pieza_rueda_grande);
 	glEndList();
 
+	glNewList(pieza_rueda_chica, GL_COMPILE);
+		DrawPieza(9,15/2.0,2/3.0,distancias_rueda_chica,2);
+	glEndList();
+
+	glNewList(rueda_chica, GL_COMPILE);
+		DrawWheel(9,pieza_rueda_chica);
+	glEndList();
 }
 
 
@@ -212,10 +220,62 @@ void display(void)
 	//
 	// Draw here
 	//	
-		glEnable(GL_COLOR_MATERIAL);
-		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-		glColor3f(1, 0, 0);
+	//
+
+
+	int i=3;
+	int j;
+	int k;
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	
+	//Faltaría encapsular y desharcodear las cosas	
+	glPushMatrix();
+	//Itera para las 3 ruedas chicas
+		for(j=0;j<i;j++){
+		glRotatef(360/(float)i,1,0,0);
+		glPushMatrix();
+	//Dibuja el eje de las ruedas chicas
+		glTranslatef(0,0,-15);	
+			glPushMatrix();
+				glTranslatef(-4,0,0);	
+				glRotatef(90,0,1,0);
+				glScalef(2/3.0,2/3.0,8);
+				glColor3f(0, 1, 1);
+				glCallList(cilindro_base);
+			glPopMatrix();
+				glPushMatrix();
+					glColor3f(0.3, 0.5, 0.25);
+					glPushMatrix();
+	//Dibuja los ejes de las canastas				
+						for(k=0;k<i;k++){
+							glRotatef(360/(float)i,1,0,0);
+							glPushMatrix();
+								glTranslatef(0,0,-15/4.0);	
+								glTranslatef(-3,0,0);	
+								glRotatef(90,0,1,0);
+								glScalef(2/3.0*2/3.0,2/3.0*2/3.0,6);
+								glCallList(cilindro_base);
+							glPopMatrix();
+						}
+	//Dibuja la rueda chica
+					glPopMatrix();
+					glTranslatef(-3,0,0);
+					glCallList(rueda_chica);
+					glTranslatef(6,0,0);
+					glCallList(rueda_chica);
+				glPopMatrix();
+			glPopMatrix();
+		}
+	//Dibuja larueda Grande
+		glPopMatrix();
+		glColor3f(0, 1, 1);
+		glTranslatef(-4,0,0);
 		glCallList(rueda_grande);
+		glTranslatef(8,0,0);
+		glCallList(rueda_grande);
+
+	glPopMatrix();
 	//
 	///////////////////////////////////////////////////
 

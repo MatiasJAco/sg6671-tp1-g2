@@ -64,7 +64,7 @@ void DrawCylinder(GLuint lados=9, GLfloat radio=0.5, GLfloat altura=1){
 	return;
 	}	
 
-void DrawPieza(size_t lados=5, float largo=10, float * pos_trans=NULL, size_t cant_trans=3 ){
+void DrawPieza(size_t lados=5, float largo=10, float ancho=1,float * pos_trans=NULL, size_t cant_trans=3 ){
 	size_t i;
 	float def_pos[]={1,3/7.0,5/7.0};
 	float phi=180/(float)lados;
@@ -79,7 +79,7 @@ void DrawPieza(size_t lados=5, float largo=10, float * pos_trans=NULL, size_t ca
 				glPushMatrix();
 					glTranslated(0,largo*pos_trans[i],0);
 					glRotatef(phi,1,0,0);
-					glScalef(1,1,LADO_LENGTH(largo*pos_trans[i], lados));
+					glScalef(ancho,ancho,LADO_LENGTH(largo*pos_trans[i], lados));
 					glCallList(cilindro_base);
 				glPopMatrix();
 			}
@@ -88,7 +88,7 @@ void DrawPieza(size_t lados=5, float largo=10, float * pos_trans=NULL, size_t ca
 		glPushMatrix();
 			glRotatef(-90,1,0,0);
 //          glTranslated(0,0,0.5);
-			glScalef(1,1,largo);
+			glScalef(ancho,ancho,largo);
 			glCallList(cilindro_base);
 		glPopMatrix();
 	glPopMatrix();
@@ -96,12 +96,13 @@ void DrawPieza(size_t lados=5, float largo=10, float * pos_trans=NULL, size_t ca
 }                                                  
 
 void DrawWheel(size_t lados, GLuint pieza){
-        int i;
-        glPushMatrix();
-                for (i=0;i<lados;i++){
-                glRotatef(360/(float)lados,1,0,0);
-                glCallList(pieza);
-                }
-        glPopMatrix();
+	int i;
+	glPushMatrix();
+		glRotatef(360/(float)lados-90,1,0,0);//correccion de giro
+		for (i=0;i<lados;i++){
+	    	glRotatef(360/(float)lados,1,0,0);
+			glCallList(pieza);
+		}
+	glPopMatrix();
 	return;
 }
