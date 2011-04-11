@@ -146,12 +146,18 @@ void init(void)
 	float distancias_rueda_grande[]={1,3/7.0,5/7.0};
 	float distancias_rueda_chica[]={1,1/2.0};
 //Asigno indices a las listas
-	dl_handle = glGenLists(3);
+	dl_handle = glGenLists(12);
 	cilindro_base=glGenLists(1);
 	pieza_rueda_chica=glGenLists(1);
 	pieza_rueda_grande=glGenLists(1);
 	rueda_chica=glGenLists(1);
 	rueda_grande=glGenLists(1);
+	DL_PARTBASE=glGenLists(1);
+	DL_WALL=glGenLists(1);
+	DL_CORNER=glGenLists(1);
+	DL_CEILING=glGenLists(1);
+	DL_FLOOR=glGenLists(1);
+	DL_SWALL=glGenLists(1);
 	
 	glClearColor (0.02f, 0.02f, 0.04f, 0.0f);
     glShadeModel (GL_SMOOTH);
@@ -195,6 +201,29 @@ void init(void)
 	glNewList(rueda_chica, GL_COMPILE);
 		DrawWheel(9,pieza_rueda_chica);
 	glEndList();
+
+	/*Carga partes para la base y cabina*/
+
+	glNewList(DL_PARTBASE, GL_COMPILE);
+	DrawParteBase();
+	glEndList();
+	glNewList(DL_WALL, GL_COMPILE);
+	drawWalls();
+	glEndList();
+	glNewList(DL_CORNER, GL_COMPILE);
+	drawCorner();
+	glEndList();
+	glNewList(DL_CEILING, GL_COMPILE);
+	drawCeiling();
+	glEndList();
+	glNewList(DL_FLOOR, GL_COMPILE);
+	drawFloor();
+	glEndList();
+	glNewList(DL_SWALL, GL_COMPILE);
+	drawSecondWall();
+	glEndList();
+
+
 }
 
 
@@ -228,17 +257,17 @@ void display(void)
 	int k;
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	
-	//Faltaría encapsular y desharcodear las cosas	
+
+	//Faltaría encapsular y desharcodear las cosas
 	glPushMatrix();
 	//Itera para las 3 ruedas chicas
 		for(j=0;j<i;j++){
 		glRotatef(360/(float)i,1,0,0);
 		glPushMatrix();
 	//Dibuja el eje de las ruedas chicas
-		glTranslatef(0,0,-15);	
+		glTranslatef(0,0,-15);
 			glPushMatrix();
-				glTranslatef(-4,0,0);	
+				glTranslatef(-4,0,0);
 				glRotatef(90,0,1,0);
 				glScalef(2/3.0,2/3.0,8);
 				glColor3f(0, 1, 1);
@@ -247,12 +276,12 @@ void display(void)
 				glPushMatrix();
 					glColor3f(0.3, 0.5, 0.25);
 					glPushMatrix();
-	//Dibuja los ejes de las canastas				
+	//Dibuja los ejes de las canastas
 						for(k=0;k<i;k++){
 							glRotatef(360/(float)i,1,0,0);
 							glPushMatrix();
-								glTranslatef(0,0,-15/4.0);	
-								glTranslatef(-3,0,0);	
+								glTranslatef(0,0,-15/4.0);
+								glTranslatef(-3,0,0);
 								glRotatef(90,0,1,0);
 								glScalef(2/3.0*2/3.0,2/3.0*2/3.0,6);
 								glCallList(cilindro_base);
@@ -276,6 +305,20 @@ void display(void)
 		glCallList(rueda_grande);
 
 	glPopMatrix();
+
+//Dibuja la base y la cabina, descomentar para ver.
+
+//	glPushMatrix();
+//		glColor3f(0.4, 0.4, 0.4);
+//		drawBase();
+//	glPopMatrix();
+
+//	glPushMatrix();
+//	glColor3f(1.0,0.3,0.1);
+//	drawCabina();
+//	glPopMatrix();
+
+
 	//
 	///////////////////////////////////////////////////
 
