@@ -4,7 +4,7 @@
  *  Created on: 26/03/2011
  *      Author: Matías
  */
-
+#define GLUT_DISABLE_ATEXIT_HACK
 #include <GL/glut.h>
 #include <math.h>
 #include "parametricfunctions.h"
