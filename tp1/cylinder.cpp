@@ -2,15 +2,15 @@
 #include <GL/glut.h>
 #include "parametricfunctions.h"
 #include "globals.h"
+#include "cylinder.h"
 
 /*
 float LadoSize(float radio, int lados){
 	return radio*2*sinf(M_PI/lados);
 }
 */
-#define LADO_LENGTH(radio,lados) ((radio)*2*sinf(M_PI/(float)(lados)))
 
-void DrawCylinder(GLuint lados=9, GLfloat radio=0.5, GLfloat altura=1){
+void DrawCylinder(GLuint lados, GLfloat radio, GLfloat altura){
 	//lados: vértices en los que se discretiza el círculo.
 	GLfloat * puntos;
 	GLfloat * normales;
@@ -64,7 +64,7 @@ void DrawCylinder(GLuint lados=9, GLfloat radio=0.5, GLfloat altura=1){
 	return;
 	}	
 
-void DrawPieza(size_t lados=5, float largo=10, float ancho=1,float * pos_trans=NULL, size_t cant_trans=3 ){
+void DrawPieza(size_t lados, float largo, float ancho,float * pos_trans, size_t cant_trans ){
 	size_t i;
 	float def_pos[]={1,3/7.0,5/7.0};
 	float phi=180/(float)lados;

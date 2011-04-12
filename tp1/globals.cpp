@@ -14,3 +14,6 @@ GLuint DL_CORNER=0;
 GLuint DL_CEILING=0;
 GLuint DL_FLOOR=0;
 GLuint DL_SWALL=0;
+
+
+int rotation_bigw = 0;

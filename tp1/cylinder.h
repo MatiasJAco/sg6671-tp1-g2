@@ -5,6 +5,7 @@
  */
 
 #include <math.h>
+#define LADO_LENGTH(radio,lados) ((radio)*2*sinf(M_PI/(float)(lados)))
 
 void DrawCylinder(GLuint lados=10, GLfloat radio=0.5, GLfloat altura=1);
 void DrawPieza(size_t lados=5, float largo=10, float ancho=1, float * pos_trans=NULL, size_t cant_trans=3);
