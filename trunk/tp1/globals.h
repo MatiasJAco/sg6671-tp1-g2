@@ -13,3 +13,4 @@ extern GLuint DL_CORNER;
 extern GLuint DL_CEILING;
 extern GLuint DL_FLOOR;
 extern GLuint DL_SWALL;
+extern int rotation_bigw;

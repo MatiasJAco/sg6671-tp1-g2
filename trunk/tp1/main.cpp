@@ -16,6 +16,8 @@
 #include <iostream>
 using namespace std;
 
+//static int rotation_bigw = 0;
+
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
 float eye[3] = {15.0, 15.0, 5.0};
@@ -57,9 +59,9 @@ GLfloat window_size[2];
 
 void OnIdle (void)
 {
-	rotate_sphere += 0.1f;
-	if(rotate_sphere > 360.0) rotate_sphere = 0.0;
-    glutPostRedisplay();
+    	
+	rotation_bigw = (rotation_bigw + 1) % 360;
+	glutPostRedisplay();
 }
 
 void DrawAxis()
@@ -259,6 +261,20 @@ void display(void)
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
 	//Faltaría encapsular y desharcodear las cosas
+
+	glTranslatef(0,0,30);
+	
+	//Dibuja la Base
+	glPushMatrix();
+		glColor3f(0.4, 0.4, 0.4);
+		glTranslatef(+5,0,-30);
+		glScalef(5, 5, 5);
+		drawBase();
+	glPopMatrix();
+	
+	//Rota la rueda Grande
+	glRotatef(rotation_bigw,1,0,0);
+
 	glPushMatrix();
 	//Itera para las 3 ruedas chicas
 		for(j=0;j<i;j++){
@@ -274,30 +290,51 @@ void display(void)
 				glCallList(cilindro_base);
 			glPopMatrix();
 				glPushMatrix();
-					glColor3f(0.3, 0.5, 0.25);
+					glRotatef(-2*rotation_bigw,1,0,0);
 					glPushMatrix();
 	//Dibuja los ejes de las canastas
 						for(k=0;k<i;k++){
+			//Rota la Rueda Chica	
 							glRotatef(360/(float)i,1,0,0);
 							glPushMatrix();
-								glTranslatef(0,0,-15/4.0);
-								glTranslatef(-3,0,0);
-								glRotatef(90,0,1,0);
-								glScalef(2/3.0*2/3.0,2/3.0*2/3.0,6);
-								glCallList(cilindro_base);
+								glTranslatef(0,0,-15/2.0);
+								glPushMatrix();
+								glPushAttrib(GL_CURRENT_BIT);
+									glColor3f(0.3, 0.5, 0.25);
+									glTranslatef(-3,0,0);
+									glRotatef(90,0,1,0);
+									glScalef(2/3.0*2/3.0,2/3.0*2/3.0,6);
+									glCallList(cilindro_base);
+                                                	        glPopAttrib();
+								glPopMatrix();
+//Canasta
+        	                                                glPushMatrix();
+	                                                        glPushAttrib(GL_CURRENT_BIT);
+                	                                                glColor3f(1.0,0.3,0.1);
+                        	                                	glRotatef(-360/(float)i*(k+1+j+1)+rotation_bigw,1,0,0);
+                                	                                glScalef((LADO_LENGTH(15/2.0,9))/1.5,(LADO_LENGTH(15/2.0,9))/1.5,(LADO_LENGTH(15/2.0,9)/1.5));
+                                        	                        glTranslatef(0,0,-2);
+                                                        	        drawCabina();
+                                                	        glPopAttrib();
+	                                                        glPopMatrix();
 							glPopMatrix();
+							
 						}
 	//Dibuja la rueda chica
 					glPopMatrix();
-					glTranslatef(-3,0,0);
-					glCallList(rueda_chica);
-					glTranslatef(6,0,0);
-					glCallList(rueda_chica);
+					
+					glPushAttrib(GL_CURRENT_BIT);
+						glColor3f(0.3, 0.5, 0.25);
+						glTranslatef(-3,0,0);
+						glCallList(rueda_chica);
+						glTranslatef(6,0,0);
+						glCallList(rueda_chica);
+                                        glPopAttrib();
 				glPopMatrix();
 			glPopMatrix();
 		}
-	//Dibuja larueda Grande
 		glPopMatrix();
+	//Dibuja larueda Grande
 		glColor3f(0, 1, 1);
 		glTranslatef(-4,0,0);
 		glCallList(rueda_grande);
@@ -305,18 +342,6 @@ void display(void)
 		glCallList(rueda_grande);
 
 	glPopMatrix();
-
-//Dibuja la base y la cabina, descomentar para ver.
-
-//	glPushMatrix();
-//		glColor3f(0.4, 0.4, 0.4);
-//		drawBase();
-//	glPopMatrix();
-
-//	glPushMatrix();
-//	glColor3f(1.0,0.3,0.1);
-//	drawCabina();
-//	glPopMatrix();
 
 
 	//
