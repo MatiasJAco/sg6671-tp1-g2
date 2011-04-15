@@ -373,4 +373,13 @@ void drawBase()
     	glScalef(0.2, 0.2, 2.0);
     	glCallList(cilindro_base);
     glPopMatrix();
+    glPushMatrix();
+    	glColor3f(1.0,0.0,0.0);
+    	glTranslatef(0.0, 0.0, 6.0);
+    	glRotatef(90, 0.0, 0.0, 1.0);
+    	glRotatef(-90, 1.0, 0.0, 0.0);
+    	glScalef(0.2, 0.2, 2.0);
+    	glCallList(cilindro_base);
+    glPopMatrix();
+
 }

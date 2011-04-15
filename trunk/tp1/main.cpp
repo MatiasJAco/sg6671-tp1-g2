@@ -506,10 +506,10 @@ void keyboard (unsigned char key, int x, int y)
 		  glutPostRedisplay();
 		  break;
 	case 'a':
-		ms--;
+		ms++;
 		break;
 	case 's':
-		ms++;
+		ms--;
 		break;
      default:
          break;
