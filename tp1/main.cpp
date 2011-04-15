@@ -57,12 +57,21 @@ GLfloat window_size[2];
 #define TOP_VIEW_POSY	((int)((float)W_HEIGHT*0.60f))
 #define TOP_VIEW_H		((int)((float)W_HEIGHT*0.40f))
 
-void OnIdle (void)
-{
-    	
+int ms = 70;
+
+void Avanzar(int value) {
 	rotation_bigw = (rotation_bigw + 1) % 360;
-	glutPostRedisplay();
+    glutTimerFunc(ms,Avanzar,1);
+    glutPostRedisplay();
 }
+
+
+//void OnIdle (void)
+//{
+//
+//	rotation_bigw = (rotation_bigw + 1) % 360;
+//	glutPostRedisplay();
+//}
 
 void DrawAxis()
 {
@@ -379,7 +388,7 @@ void keyboard (unsigned char key, int x, int y)
          exit(0);
          break;
 
-	  case 'u':
+	  case 'p':
 		  view_grid = !view_grid;
 		  glutPostRedisplay();
 		  break;
@@ -428,11 +437,11 @@ void keyboard (unsigned char key, int x, int y)
 		eye[0]+=1;
 		  glutPostRedisplay();
 		  break;
-	case 's':
+	case 'u':
 		eye[0]-=1;
 		  glutPostRedisplay();
 		  break;
-	case 'a':
+	case 'y':
 		eye[1]-=1;
 		  glutPostRedisplay();
 		  break;
@@ -496,6 +505,12 @@ void keyboard (unsigned char key, int x, int y)
 		up[2]+=1;
 		  glutPostRedisplay();
 		  break;
+	case 'a':
+		ms--;
+		break;
+	case 's':
+		ms++;
+		break;
      default:
          break;
    }
@@ -514,7 +529,8 @@ int main(int argc, char** argv)
    glutDisplayFunc(display); 
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
-   glutIdleFunc(OnIdle);
+   glutTimerFunc(ms,Avanzar,1);
+//   glutIdleFunc(OnIdle);
    glutMainLoop();
    return 0;
 }
