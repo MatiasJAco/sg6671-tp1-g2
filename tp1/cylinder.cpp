@@ -110,110 +110,50 @@ void DrawWheel(size_t lados, GLuint pieza){
 
 void drawWalls(){
 
-	glBegin(GL_QUADS);
+	GLfloat Vertices [24]={1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0,
+			1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0,
+			-1.0, 1.0, -1.0, -1.0, -1.0, -1.0};
+	GLubyte allIndices [16]= {0, 3, 4, 5, 0, 5, 6, 1, 1, 6, 7, 2, 7, 4, 3, 2};
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glDrawElements(GL_QUADS, 16, GL_UNSIGNED_BYTE, allIndices);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
-	        // v0-v3-v4-v6
-	        glNormal3f(1,0,0);
-
-	        glVertex3f(1,1,1);
-
-	        glVertex3f(1,-1,1);
-
-	        glVertex3f(1,-1,-1);
-
-	        glVertex3f(1,1,-1);
-
-	        //v0-v5-v6-v1
-	        glNormal3f(0,1,0);
-	        glVertex3f(1,1,1);
-	        glVertex3f(1,1,-1);
-	        glVertex3f(-1,1,-1);
-	        glVertex3f(-1,1,1);
-
-	        //v1-v6-v7-v2
-	        glNormal3f(-1,0,0);
-	        glVertex3f(-1,1,1);
-	        glVertex3f(-1,1,-1);
-	        glVertex3f(-1,-1,-1);
-	        glVertex3f(-1,-1,1);
-
-	        //v7-v4-v3-v2
-	        glNormal3f(0,-1,0);
-	        glVertex3f(-1,-1,-1);
-	        glVertex3f(1,-1,-1);
-	        glVertex3f(1,-1,1);
-	        glVertex3f(-1,-1,1);
-	        glEnd();
 
 
 
 };
 void drawSecondWall(){
 
-	glBegin(GL_QUADS);
-
-	// v0-v3-v4-v6
-	glNormal3f(1,0,0);
-	glVertex3f(1,1,1);
-	glVertex3f(1,-1,1);
-	glVertex3f(0.8,-0.8,-1);
-	glVertex3f(0.8,0.8,-1);
-
-	//v0-v5-v6-v1
-	glNormal3f(0,1,0);
-	glVertex3f(1,1,1);
-	glVertex3f(0.8,0.8,-1);
-	glVertex3f(-0.8,0.8,-1);
-	glVertex3f(-1,1,1);
-
-	//v1-v6-v7-v2
-	glNormal3f(-1,0,0);
-	glVertex3f(-1,1,1);
-	glVertex3f(-0.8,0.8,-1);
-	glVertex3f(-0.8,-0.8,-1);
-	glVertex3f(-1,-1,1);
-
-	// v7-v4-v3-v2
-	glNormal3f(0,-1,0);
-	glVertex3f(-0.8,-0.8,-1);
-	glVertex3f(0.8,-0.8,-1);
-	glVertex3f(1,-1,1);
-	glVertex3f(-1,-1,1);
-
-	glEnd();
-
+	GLfloat Vertices [24]={1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0,
+			1.0, 1.0, -1.0, 1.0, 0.8, -0.8, -1.0, 0.8, 0.8, -1.0,
+			-0.8, 0.8, -1.0, -0.8, -0.8, -1.0};
+	GLubyte allIndices [16]= {0, 3, 4, 5, 0, 5, 6, 1, 1, 6, 7, 2, 7, 4, 3, 2};
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glDrawElements(GL_QUADS, 16, GL_UNSIGNED_BYTE, allIndices);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 };
 void drawFloor(){
 
-	glBegin(GL_QUADS);
-    // v4-v7-v6-v5
-	glNormal3f(0,0,0);
-	glVertex3f(0.8,-0.8,0);
-	glVertex3f(-0.8,-0.8,0);
-	glVertex3f(-0.8,0.8,0);
-	glVertex3f(0.8,0.8,0);
-
-	glEnd();
-
+	GLfloat Vertices [12]= {0.8, -0.8, 0.0 , -0.8, -0.8, 0.0, -0.8,
+			0.8, 0.0, 0.8, 0.8, 0.0};
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 }
 
 void drawCeiling(){
+	GLfloat Vertices [18]= {0.0, 0.0, 1.0, 1.0, 1.0, 0.0, -1.0,
+	1.0, 0.0, -1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0};
 
-	glBegin(GL_TRIANGLE_FAN);
-
-	glVertex3f(0,0,1);
-	glVertex3f(1,1,0);
-	glVertex3f(-1,1,0);
-	glVertex3f(-1,-1,0);
-	glVertex3f(1,-1,0);
-	glVertex3f(1,1,0);
-
-
-
-	glEnd();
-
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 }
 
@@ -267,26 +207,13 @@ void DrawParteBase(){
 
 void drawCorner(){
 
-		glBegin(GL_QUADS);
-
-		// v1-v6-v7-v2
-		glNormal3f(-1,0,0);
-		glVertex3f(-1,1,1);
-		glVertex3f(-1,1,-1);
-		glVertex3f(-1,-1,-1);
-		glVertex3f(-1,-1,1);
-
-		// v7-v4-v3-v2
-		glNormal3f(0,-1,0);
-		glVertex3f(-1,-1,-1);
-		glVertex3f(1,-1,-1);
-		glVertex3f(1,-1,1);
-		glVertex3f(-1,-1,1);
-
-	     glEnd();
-
-
-
+	GLfloat Vertices [18]={-1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0,
+			1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0};
+	GLubyte allIndices [8]= {0, 4, 5, 1, 5, 3, 2, 1};
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, Vertices);
+	glDrawElements(GL_QUADS, 8, GL_UNSIGNED_BYTE, allIndices);
+	glDisableClientState(GL_VERTEX_ARRAY);
 };
 
 void drawCabina()
