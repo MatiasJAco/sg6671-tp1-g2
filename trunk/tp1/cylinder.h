@@ -18,3 +18,4 @@ void DrawParteBase();
 void drawCorner();
 void drawCabina();
 void drawBase();
+void eyecorrection(float *, float);
