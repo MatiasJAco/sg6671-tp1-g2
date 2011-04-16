@@ -20,8 +20,8 @@ using namespace std;
 
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
-float eye[3] = {15.0, 15.0, 5.0};
-float at[3]  = { 0.0,  0.0, 0.0};
+float eye[3] = {0, 0, -3.0};
+float at[3]  = { 0.0,  -1.0, -3.0};
 float up[3]  = { 0.0,  0.0, 1.0};
 
 // Variables asociadas a única fuente de luz de la escena
@@ -246,10 +246,13 @@ void display(void)
 	Set3DEnv();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt (eye[0], eye[1], eye[2], at[0], at[1], at[2], up[0], up[1], up[2]);
-   
+	
 	if (view_axis)
 		 glCallList(DL_AXIS);
+	float eyemod[3]={0,0,0};;
+
+	eyecorrection(eyemod,rotation_bigw/180.0*M_PI);
+	gluLookAt (eyemod[0]+eye[0], eyemod[1]+eye[1], eyemod[2]+eye[2],eyemod[0]+at[0],eyemod[1]+at[1],eyemod[2]+at[2] , up[0], up[1], up[2]);
 	
 	if (view_grid)
 		 glCallList(DL_GRID);
@@ -301,10 +304,10 @@ void display(void)
 				glPushMatrix();
 					glRotatef(-2*rotation_bigw,1,0,0);
 					glPushMatrix();
-	//Dibuja los ejes de las canastas
 						for(k=0;k<i;k++){
 			//Rota la Rueda Chica	
 							glRotatef(360/(float)i,1,0,0);
+			//Dibuja los ejes de las canastas
 							glPushMatrix();
 								glTranslatef(0,0,-15/2.0);
 								glPushMatrix();
@@ -321,7 +324,7 @@ void display(void)
 	                                                        glPushAttrib(GL_CURRENT_BIT);
                 	                                                glColor3f(1.0,0.3,0.1);
                         	                                	glRotatef(-360/(float)i*(k+1+j+1)+rotation_bigw,1,0,0);
-                                	                                glScalef((LADO_LENGTH(15/2.0,9))/1.5,(LADO_LENGTH(15/2.0,9))/1.5,(LADO_LENGTH(15/2.0,9)/1.5));
+                                	                                glScalef((LADO_LENGTH(15/2.0,9))/1.8,(LADO_LENGTH(15/2.0,9))/1.8,(LADO_LENGTH(15/2.0,9)/1.8));
                                         	                        glTranslatef(0,0,-2);
                                                         	        drawCabina();
                                                 	        glPopAttrib();
@@ -437,11 +440,11 @@ void keyboard (unsigned char key, int x, int y)
 		eye[0]+=1;
 		  glutPostRedisplay();
 		  break;
-	case 'u':
+	case 's':
 		eye[0]-=1;
 		  glutPostRedisplay();
 		  break;
-	case 'y':
+	case 'a':
 		eye[1]-=1;
 		  glutPostRedisplay();
 		  break;
@@ -505,10 +508,10 @@ void keyboard (unsigned char key, int x, int y)
 		up[2]+=1;
 		  glutPostRedisplay();
 		  break;
-	case 'a':
+	case '8':
 		ms++;
 		break;
-	case 's':
+	case '9':
 		ms--;
 		break;
      default:
