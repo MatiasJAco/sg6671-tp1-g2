@@ -20,8 +20,8 @@ using namespace std;
 
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
-float eye[3] = {0, 0, -3.0};
-float at[3]  = { 0.0,  -1.0, -3.0};
+float eye[3] = {0, 0, 0.0};
+float at[3]  = { -1.0,  0.0, 4.0};
 float up[3]  = { 0.0,  0.0, 1.0};
 
 // Variables asociadas a única fuente de luz de la escena
@@ -57,10 +57,14 @@ GLfloat window_size[2];
 #define TOP_VIEW_POSY	((int)((float)W_HEIGHT*0.60f))
 #define TOP_VIEW_H		((int)((float)W_HEIGHT*0.40f))
 
-int ms = 70;
-
+int ms = 180;
+int rotation_smallw=0;
 void Avanzar(int value) {
+
+
 	rotation_bigw = (rotation_bigw + 1) % 360;
+	//a pesar que multiplico por -3 la rotacion la hace con (-2)
+	rotation_smallw=rotation_bigw*(-3);
     glutTimerFunc(ms,Avanzar,1);
     glutPostRedisplay();
 }
@@ -249,9 +253,9 @@ void display(void)
 	
 	if (view_axis)
 		 glCallList(DL_AXIS);
-	float eyemod[3]={0,0,0};;
+	float eyemod[3]={0,0,0};
 
-	eyecorrection(eyemod,rotation_bigw/180.0*M_PI);
+	eyecorrection(eyemod,rotation_bigw);
 	gluLookAt (eyemod[0]+eye[0], eyemod[1]+eye[1], eyemod[2]+eye[2],eyemod[0]+at[0],eyemod[1]+at[1],eyemod[2]+at[2] , up[0], up[1], up[2]);
 	
 	if (view_grid)
@@ -302,7 +306,7 @@ void display(void)
 				glCallList(cilindro_base);
 			glPopMatrix();
 				glPushMatrix();
-					glRotatef(-2*rotation_bigw,1,0,0);
+					glRotatef(rotation_smallw,1,0,0);
 					glPushMatrix();
 						for(k=0;k<i;k++){
 			//Rota la Rueda Chica	
@@ -317,13 +321,13 @@ void display(void)
 									glRotatef(90,0,1,0);
 									glScalef(2/3.0*2/3.0,2/3.0*2/3.0,6);
 									glCallList(cilindro_base);
-                                                	        glPopAttrib();
+								glPopAttrib();
 								glPopMatrix();
 //Canasta
         	                                                glPushMatrix();
 	                                                        glPushAttrib(GL_CURRENT_BIT);
                 	                                                glColor3f(1.0,0.3,0.1);
-                        	                                	glRotatef(-360/(float)i*(k+1+j+1)+rotation_bigw,1,0,0);
+                        	                                	glRotatef(-360/(float)i*(k+1+j+1)+(2*rotation_bigw),1,0,0);
                                 	                                glScalef((LADO_LENGTH(15/2.0,9))/1.8,(LADO_LENGTH(15/2.0,9))/1.8,(LADO_LENGTH(15/2.0,9)/1.8));
                                         	                        glTranslatef(0,0,-2);
                                                         	        drawCabina();
@@ -436,6 +440,34 @@ void keyboard (unsigned char key, int x, int y)
 		  glutPostRedisplay();
 		  break;
 
+	  case '4':
+		  eye[0] = 0.0;
+		  eye[1] = 0.0;
+		  eye[2] = 4.0;
+
+		  at[0] = -2.0;
+		  at[1] = 0.0;
+		  at[2] = 4.0;
+
+		  up[0] = 0.0;
+		  up[1] = 0.0;
+		  up[2] = 1.0;
+		  glutPostRedisplay();
+		  break;
+	  case '5':
+	 		  eye[0] = 0.0;
+	 		  eye[1] = 0.0;
+	 		  eye[2] = 22.0;
+
+	 		  at[0] = -2.0;
+	 		  at[1] = 0.0;
+	 		  at[2] = 25.0;
+
+	 		  up[0] = 0.0;
+	 		  up[1] = 0.0;
+	 		  up[2] = 1.0;
+	 		  glutPostRedisplay();
+	 		  break;
 	case 'w':
 		eye[0]+=1;
 		  glutPostRedisplay();

@@ -308,5 +308,30 @@ void drawBase()
     	glScalef(0.2, 0.2, 2.0);
     	glCallList(cilindro_base);
     glPopMatrix();
-
 }
+
+void eyecorrection(float* e, float b){
+	//Movimiento de rueda chica
+	float phi=((((-2*b)-90))*M_PI)/180.0;
+	int radioRuedaChica=7;
+	int radioRuedaGrande=15;
+	e[1]=radioRuedaChica*cosf(phi);
+	e[2]=radioRuedaChica*sinf(phi);
+
+	//Muevo en z.
+	e[2]=e[2] + 15;
+	float theta=(((b-90))*M_PI)/180.0;
+	//Movimiento por grande
+	float y=radioRuedaGrande*cosf(theta);
+	float z=radioRuedaGrande*sinf(theta);
+
+	//Sumo la traslacion por rueda grande.
+	e[1]=e[1] + y;
+	e[2]=e[2] + z+15;
+
+	//Bajo a la cabina
+	e[2]=e[2] - 4;
+
+
+
+};
