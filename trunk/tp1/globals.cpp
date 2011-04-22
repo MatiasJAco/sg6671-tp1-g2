@@ -17,3 +17,4 @@ GLuint DL_SWALL=0;
 
 
 int rotation_bigw = 0;
+
