@@ -330,7 +330,7 @@ void eyecorrection(float* e, float b){
 	e[2]=e[2] + z+15;
 
 	//Bajo a la cabina
-	e[2]=e[2] - 4;
+	e[2]=e[2] - 3;
 
 
 

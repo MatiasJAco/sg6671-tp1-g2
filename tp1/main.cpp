@@ -21,7 +21,7 @@ using namespace std;
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
 float eye[3] = {0, 0, 0.0};
-float at[3]  = { -1.0,  0.0, 4.0};
+float at[3]  = { 0.0,  0.0, 0.0};
 float up[3]  = { 0.0,  0.0, 1.0};
 
 // Variables asociadas a única fuente de luz de la escena
@@ -259,10 +259,11 @@ void display(void)
 	
 	if (view_axis)
 		 glCallList(DL_AXIS);
-//	float eyemod[3]={0,0,0};
+
+	eyecorrection(eyemod,rotation_bigw);
 
 //	eyecorrection(eyemod,rotation_bigw);
-	gluLookAt (newX, newY,newZ,at[0],at[1],at[2] , up[0], up[1], up[2]);
+	gluLookAt (eyemod[0]+eye[0], eyemod[1]+eye[1],eyemod[2]+eye[2],newX,newY,newZ , up[0], up[1], up[2]);
 	
 	if (view_grid)
 		 glCallList(DL_GRID);
