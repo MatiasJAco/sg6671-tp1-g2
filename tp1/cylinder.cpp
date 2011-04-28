@@ -344,6 +344,7 @@ void mouseCam( GLint xMouse, GLint yMouse){
 			mouseY=yMouse;
 			mouseXante=xMouse;
 			mouseYante=yMouse;
+
 			first =false;
 		}else{
 			int difAnteX=xMouse-mouseXante;
@@ -357,19 +358,11 @@ void mouseCam( GLint xMouse, GLint yMouse){
 			alfa=(alfa*M_PI)/180.0;
 			float beta=yDelta;
 			beta=(beta*M_PI)/180.0;
-			if(difAnteX!=0 && difAnteY!=0){
-				newX=radio*cosf(alfa);
-				newY=radio*cosf(beta);
-				newZ=radio*sinf(beta);
-			};
-			if(difAnteX==0 && difAnteY!=0){
-				newY=radio*cosf(beta);
-				newZ=radio*sinf(beta);
-			};
-			if(difAnteX!=0 && difAnteY==0){
-				newX=radio*cosf(alfa);
-				newY=radio*sinf(alfa);
-			};
+
+			newX=radio*cosf(alfa)*sinf(beta);
+			newY=radio*sinf(alfa)*sinf(beta);
+			newZ=radio*cosf(beta);
+
 			mouseXante=xMouse;
 			mouseYante=yMouse;
 
