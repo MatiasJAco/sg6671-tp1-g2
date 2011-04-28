@@ -19,3 +19,4 @@ void drawCorner();
 void drawCabina();
 void drawBase();
 void eyecorrection(float *, float);
+void mouseCam( GLint xMouse, GLint yMouse);

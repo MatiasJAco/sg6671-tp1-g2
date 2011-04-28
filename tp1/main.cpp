@@ -57,8 +57,14 @@ GLfloat window_size[2];
 #define TOP_VIEW_POSY	((int)((float)W_HEIGHT*0.60f))
 #define TOP_VIEW_H		((int)((float)W_HEIGHT*0.40f))
 
+//Variables para animacion
 int ms = 180;
 int rotation_smallw=0;
+
+//Variables para camara
+
+float eyemod[3]={0,0,0};
+
 void Avanzar(int value) {
 
 
@@ -253,10 +259,10 @@ void display(void)
 	
 	if (view_axis)
 		 glCallList(DL_AXIS);
-	float eyemod[3]={0,0,0};
+//	float eyemod[3]={0,0,0};
 
-	eyecorrection(eyemod,rotation_bigw);
-	gluLookAt (eyemod[0]+eye[0], eyemod[1]+eye[1], eyemod[2]+eye[2],eyemod[0]+at[0],eyemod[1]+at[1],eyemod[2]+at[2] , up[0], up[1], up[2]);
+//	eyecorrection(eyemod,rotation_bigw);
+	gluLookAt (newX, newY,newZ,at[0],at[1],at[2] , up[0], up[1], up[2]);
 	
 	if (view_grid)
 		 glCallList(DL_GRID);
@@ -468,6 +474,24 @@ void keyboard (unsigned char key, int x, int y)
 	 		  up[2] = 1.0;
 	 		  glutPostRedisplay();
 	 		  break;
+
+	  case '7':
+
+		  eyecorrection(eyemod,rotation_bigw);
+
+		  eye[0] = eyemod[0]+eye[0];
+		  eye[1] = eyemod[1]+eye[1];
+		  eye[2] = eyemod[2]+eye[2];
+
+		  at[0] = eyemod[0]+at[0];
+		  at[1] = eyemod[1]+at[1];
+		  at[2] = eyemod[2]+at[2];
+
+		  up[0] = 0.0;
+		  up[1] = 0.0;
+		  up[2] = 1.0;
+		  glutPostRedisplay();
+		  break;
 	case 'w':
 		eye[0]+=1;
 		  glutPostRedisplay();
@@ -551,6 +575,10 @@ void keyboard (unsigned char key, int x, int y)
    }
 }
 
+
+
+
+
 int main(int argc, char** argv)
 {
    glutInit(&argc, argv);
@@ -565,6 +593,7 @@ int main(int argc, char** argv)
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
    glutTimerFunc(ms,Avanzar,1);
+   glutPassiveMotionFunc(mouseCam);
 //   glutIdleFunc(OnIdle);
    glutMainLoop();
    return 0;

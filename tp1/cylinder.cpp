@@ -335,3 +335,47 @@ void eyecorrection(float* e, float b){
 
 
 };
+
+void mouseCam( GLint xMouse, GLint yMouse){
+
+//	if( button==GLUT_LEFT_BUTTON && action == GLUT_DOWN){
+		if(first){
+			mouseX=xMouse;
+			mouseY=yMouse;
+			mouseXante=xMouse;
+			mouseYante=yMouse;
+			first =false;
+		}else{
+			int difAnteX=xMouse-mouseXante;
+			int difAnteY=yMouse-mouseYante;
+			int difX=xMouse-mouseX;
+			int difY=yMouse-mouseY;
+			xDelta=(float)((difX)% 360);
+			yDelta=(float)((difY)% 360);
+
+			float alfa=xDelta;
+			alfa=(alfa*M_PI)/180.0;
+			float beta=yDelta;
+			beta=(beta*M_PI)/180.0;
+			if(difAnteX!=0 && difAnteY!=0){
+				newX=radio*cosf(alfa);
+				newY=radio*cosf(beta);
+				newZ=radio*sinf(beta);
+			};
+			if(difAnteX==0 && difAnteY!=0){
+				newY=radio*cosf(beta);
+				newZ=radio*sinf(beta);
+			};
+			if(difAnteX!=0 && difAnteY==0){
+				newX=radio*cosf(alfa);
+				newY=radio*sinf(alfa);
+			};
+			mouseXante=xMouse;
+			mouseYante=yMouse;
+
+		};
+
+
+	};
+
+
