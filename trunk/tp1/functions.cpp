@@ -2,13 +2,8 @@
 #include <GL/glut.h>
 #include "parametricfunctions.h"
 #include "globals.h"
-#include "cylinder.h"
+#include "functions.h"
 
-/*
-float LadoSize(float radio, int lados){
-	return radio*2*sinf(M_PI/lados);
-}
-*/
 
 void DrawCylinder(GLuint lados, GLfloat radio, GLfloat altura){
 	//lados: vértices en los que se discretiza el círculo.
@@ -161,9 +156,9 @@ void drawCeiling(){
 void DrawParteBase(){
 
 
-	glBegin(DL_PARTBASE);
-	glMatrixMode(GL_MODELVIEW);
 
+	glMatrixMode(GL_MODELVIEW);
+	//Parte inferior
 	glPushMatrix();
 		glTranslatef(0.0, -1.0, 0.0);
 	    glRotatef(-90, 1.0, 0.0, 0.0);
@@ -200,7 +195,7 @@ void DrawParteBase(){
 	    	glCallList(cilindro_base);
 	    glPopMatrix();
 
-	glEnd();
+
 
 
 }
@@ -310,9 +305,9 @@ void drawBase()
     glPopMatrix();
 }
 
-void eyecorrection(float* e, float b){
+void eyecorrection(float* e, float angulo){
 	//Movimiento de rueda chica
-	float phi=((((-2*b)-90))*M_PI)/180.0;
+	float phi=((((-2*angulo)-90))*M_PI)/180.0;
 	int radioRuedaChica=7;
 	int radioRuedaGrande=15;
 	e[1]=radioRuedaChica*cosf(phi);
@@ -320,8 +315,8 @@ void eyecorrection(float* e, float b){
 
 	//Muevo en z.
 	e[2]=e[2] + 15;
-	float theta=(((b-90))*M_PI)/180.0;
-	//Movimiento por grande
+	float theta=(((angulo-90))*M_PI)/180.0;
+	//Movimiento por rueda grande
 	float y=radioRuedaGrande*cosf(theta);
 	float z=radioRuedaGrande*sinf(theta);
 
@@ -332,48 +327,31 @@ void eyecorrection(float* e, float b){
 	//Bajo a la cabina
 	e[2]=e[2] - 3;
 
-
-
 };
 
 
 void initMouse( GLint xMouse, GLint yMouse){
 			mouseX=xMouse;
 			mouseY=yMouse;
-			mouseXante=xMouse;
-			mouseYante=yMouse;
 };
 
 void mouseCam( GLint xMouse, GLint yMouse){
 
-//	if( button==GLUT_LEFT_BUTTON && action == GLUT_DOWN){
 		int signo;
-		float limitbeta_UP=85;
+		//float limitbeta_UP=85;
 		float limitbeta_DOWN;
-		float auxyDelta;
 		
+
 		limitbeta_DOWN= camara==interna ? -85:0;
 		signo= camara==interna ? -1 : 1;
-/*		if(first){
-			mouseX=xMouse;
-			mouseY=yMouse;
-			mouseXante=xMouse;
-			mouseYante=yMouse;
 
-			first =false;
-
-		}else{*/
-			int difAnteX=xMouse-mouseXante;
-			int difAnteY=yMouse-mouseYante;
 			int difX=xMouse-mouseX;
 			int difY=yMouse-mouseY;
 
 
 			xDelta=(float)((difX)%360);
 			yDelta=(float)((difY)%360);
-//			auxyDelta=(float)((difY)%360);			
-//			if (auxyDelta < limitbeta_UP && auxyDelta > limitbeta_DOWN )
-//				yDelta=auxyDelta;
+
 
 			float alfa=xDelta;
 			alfa=(alfa*M_PI)/180.0;
@@ -383,11 +361,6 @@ void mouseCam( GLint xMouse, GLint yMouse){
 			newX=radio*cosf(alfa)*sinf(beta);
 			newY=signo*radio*sinf(alfa)*sinf(beta);
 			newZ=signo*radio*cosf(beta);
-
-			mouseXante=xMouse;
-			mouseYante=yMouse;
-
-//		};
 
 
 	};
@@ -416,12 +389,12 @@ void initExtCam(){
 	eye[0]=32;
 	eye[1]=0;
 	eye[2]=0;
-//	glutPassiveMotionFunc(initMouse);
+
 };
 
 void initIntCam(){
 	eye[0]=0;
 	eye[1]=0;
 	eye[2]=0;
-//	glutPassiveMotionFunc(initMouse);
+
 };

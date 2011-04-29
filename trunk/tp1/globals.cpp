@@ -1,5 +1,4 @@
 //Declaración de variables Globales para listas.
-//Si al final quedan pocas las pasamos al main.
 #define GLUT_DISABLE_ATEXIT_HACK
 #include <GL/glut.h>
 #include "globals.h"
@@ -15,7 +14,7 @@ GLuint DL_CORNER=0;
 GLuint DL_CEILING=0;
 GLuint DL_FLOOR=0;
 GLuint DL_SWALL=0;
-
+GLuint DL_CABIN=0;
 
 int rotation_bigw = 0;
 
@@ -26,8 +25,6 @@ int rotation_bigw = 0;
  float newZ=0;
  int mouseX=0;
  int mouseY=0;
- int mouseXante=0;
- int mouseYante=0;
 
  camMod camara=interna;
 

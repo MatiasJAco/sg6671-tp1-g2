@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include "parametricfunctions.h"
 #include "globals.h"
-#include "cylinder.h"
+#include "functions.h"
 #include <iostream>
 using namespace std;
 
@@ -51,12 +51,6 @@ void Avanzar(int value) {
 }
 
 
-//void OnIdle (void)
-//{
-//
-//	rotation_bigw = (rotation_bigw + 1) % 360;
-//	glutPostRedisplay();
-//}
 
 void DrawAxis()
 {
@@ -142,7 +136,7 @@ void init(void)
 	float distancias_rueda_grande[]={1,3/7.0,5/7.0};
 	float distancias_rueda_chica[]={1,1/2.0};
 //Asigno indices a las listas
-	dl_handle = glGenLists(12);
+	dl_handle = glGenLists(13);
 	cilindro_base=glGenLists(1);
 	pieza_rueda_chica=glGenLists(1);
 	pieza_rueda_grande=glGenLists(1);
@@ -154,7 +148,7 @@ void init(void)
 	DL_CEILING=glGenLists(1);
 	DL_FLOOR=glGenLists(1);
 	DL_SWALL=glGenLists(1);
-	
+	DL_CABIN=glGenLists(1);
 	glClearColor (0.02f, 0.02f, 0.04f, 0.0f);
     glShadeModel (GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
@@ -175,7 +169,7 @@ void init(void)
 		DrawAxis2DTopView();
 	glEndList();
 
-/*Arranco a Cargar las ruedas*/
+/*Carga las ruedas*/
 
 
 	glNewList(cilindro_base, GL_COMPILE);
@@ -218,6 +212,9 @@ void init(void)
 	glNewList(DL_SWALL, GL_COMPILE);
 	drawSecondWall();
 	glEndList();
+	glNewList(DL_CABIN, GL_COMPILE);
+	drawCabina();
+	glEndList();
 //mouse coords
 	glutPassiveMotionFunc(initMouse);
 
@@ -243,7 +240,7 @@ void display(void)
 	if (camara==interna)
 		gluLookAt (eyemod[0]+eye[0], eyemod[1]+eye[1],eyemod[2]+eye[2],eyemod[0]+newX,eyemod[1]+newY,eyemod[2]+newZ , up[0], up[1], up[2]);
 	else
-		gluLookAt (newX, newY,newZ,0,0,30 , up[0], up[1], up[2]);
+		gluLookAt (newX, newY, newZ, 0, 0, 30, up[0], up[1], up[2]);
 	
 	if (view_grid)
 		 glCallList(DL_GRID);
@@ -263,7 +260,7 @@ void display(void)
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-	//Faltaría encapsular y desharcodear las cosas
+
 
 	glTranslatef(0,0,30);
 	
@@ -317,7 +314,7 @@ void display(void)
                         	                                	glRotatef(-360/(float)i*(k+1+j+1)+(2*rotation_bigw),1,0,0);
                                 	                                glScalef((LADO_LENGTH(15/2.0,9))/1.8,(LADO_LENGTH(15/2.0,9))/1.8,(LADO_LENGTH(15/2.0,9)/1.8));
                                         	                        glTranslatef(0,0,-2);
-                                                        	        drawCabina();
+                                        	                        glCallList(DL_CABIN);
                                                 	        glPopAttrib();
 	                                                        glPopMatrix();
 							glPopMatrix();
@@ -381,187 +378,15 @@ void keyboard (unsigned char key, int x, int y)
       case 'q':
          exit(0);
          break;
-/*
-	  case 'p':
-		  view_grid = !view_grid;
-		  glutPostRedisplay();
-		  break;
-
-	  case 'r':
-		  view_axis = !view_axis;
-		  glutPostRedisplay();
-		  break;
-
-	  case 'e':
-		  edit_panel = !edit_panel;
-		  glutPostRedisplay();
-		  break;
-
-	  case '2':
-		  eye[0] = 0.0;
-		  eye[1] = 0.0;
-		  eye[2] = 15.0;
-
-		  at[0] = 0.0;
-		  at[1] = 0.0;
-		  at[2] = 0.0;
-
-		  up[0] = 0.0;
-		  up[1] = 1.0;
-		  up[2] = 0.0;
-		  glutPostRedisplay();
-		  break;
-
-	  case '3':
-		  eye[0] = 6.0;
-		  eye[1] = 6.0;
-		  eye[2] = 2.0;
-
-		  at[0] = 0.0;
-		  at[1] = 0.0;
-		  at[2] = 0.0;
-
-		  up[0] = 0.0;
-		  up[1] = 0.0;
-		  up[2] = 1.0;
-		  glutPostRedisplay();
-		  break;
-
-	  case '4':
-		  eye[0] = 0.0;
-		  eye[1] = 0.0;
-		  eye[2] = 4.0;
-
-		  at[0] = -2.0;
-		  at[1] = 0.0;
-		  at[2] = 4.0;
-
-		  up[0] = 0.0;
-		  up[1] = 0.0;
-		  up[2] = 1.0;
-		  glutPostRedisplay();
-		  break;
-	  case '5':
-	 		  eye[0] = 0.0;
-	 		  eye[1] = 0.0;
-	 		  eye[2] = 22.0;
-
-	 		  at[0] = -2.0;
-	 		  at[1] = 0.0;
-	 		  at[2] = 25.0;
-
-	 		  up[0] = 0.0;
-	 		  up[1] = 0.0;
-	 		  up[2] = 1.0;
-	 		  glutPostRedisplay();
-	 		  break;
-
-	  case '7':
-
-		  eyecorrection(eyemod,rotation_bigw);
-
-		  eye[0] = eyemod[0]+eye[0];
-		  eye[1] = eyemod[1]+eye[1];
-		  eye[2] = eyemod[2]+eye[2];
-
-		  at[0] = eyemod[0]+at[0];
-		  at[1] = eyemod[1]+at[1];
-		  at[2] = eyemod[2]+at[2];
-
-		  up[0] = 0.0;
-		  up[1] = 0.0;
-		  up[2] = 1.0;
-		  glutPostRedisplay();
-		  break;
-	case 'w':
-		eye[0]+=1;
-		  glutPostRedisplay();
-		  break;
-	case 's':
-		eye[0]-=1;
-		  glutPostRedisplay();
-		  break;
 	case 'a':
-		eye[1]-=1;
-		  glutPostRedisplay();
-		  break;
-	case 'd':
-		eye[1]+=1;
-		  glutPostRedisplay();
-		  break;
-	case 'z':
-		eye[2]-=1;
-		  glutPostRedisplay();
-		  break;
-	case 'x':
-		eye[2]+=1;
-		  glutPostRedisplay();
-		  break;
-	case 't':
-		at[0]+=1;
-		  glutPostRedisplay();
-		  break;
-	case 'g':
-		at[0]-=1;
-		  glutPostRedisplay();
-		  break;
-	case 'f':
-		at[1]-=1;
-		  glutPostRedisplay();
-		  break;
-	case 'h':
-		at[1]+=1;
-		  glutPostRedisplay();
-		  break;
-	case 'c':
-		at[2]-=1;
-		  glutPostRedisplay();
-		  break;
-	case 'v':
-		at[2]+=1;
-		  glutPostRedisplay();
-		  break;
-	case 'i':
-		up[0]+=1;
-		  glutPostRedisplay();
-		  break;
-	case 'k':
-		up[0]-=1;
-		  glutPostRedisplay();
-		  break;
-	case 'j':
-		up[1]-=1;
-		  glutPostRedisplay();
-		  break;
-	case 'l':
-		up[1]+=1;
-		  glutPostRedisplay();
-		  break;
-	case 'n':
-		up[2]-=1;
-		  glutPostRedisplay();
-		  break;
-	case 'm':
-		up[2]+=1;
-		  glutPostRedisplay();
-		  break;
-	case '8':
 		ms++;
 		break;
-	case '9':
-		ms--;
-		break;
-*/
-	case 'm':
-		ms++;
-		break;
-	case 'n':
+	case 's':
 		ms--;
 		break;
 	case 'c':
 		cameraChange();
 		break;
-
      default:
          break;
    }
@@ -587,7 +412,6 @@ int main(int argc, char** argv)
    glutTimerFunc(ms,Avanzar,1);
    glutPassiveMotionFunc(mouseCam);
    glutMouseFunc(mouseButton);
-//   glutIdleFunc(OnIdle);
    glutMainLoop();
    return 0;
 }
