@@ -16,31 +16,6 @@
 #include <iostream>
 using namespace std;
 
-//static int rotation_bigw = 0;
-
-
-// Variables que controlan la ubicación de la cámara en la Escena 3D
-float eye[3] = {0, 0, 0.0};
-float at[3]  = { 0.0,  0.0, 0.0};
-float up[3]  = { 0.0,  0.0, 1.0};
-
-// Variables asociadas a única fuente de luz de la escena
-float light_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-float light_position[3] = {10.0f, 10.0f, 8.0f};
-float light_ambient[4] = {0.05f, 0.05f, 0.05f, 1.0f};
-
-// Color de la esfera en movimiento dentro de la escena
-float color_esfera[4] = {0.5f, 0.5f, 0.2f, 1.0f};
-
-// Variable asociada al movimiento de rotación de la esfera alrededor del eje Z
-float rotate_sphere = 0;
-
-// Variables de control
-bool view_grid = true;
-bool view_axis = true;
-bool edit_panel = false;
-
-
 // Handle para el control de las Display Lists
 GLuint dl_handle;
 #define DL_AXIS (dl_handle+0)
@@ -243,7 +218,8 @@ void init(void)
 	glNewList(DL_SWALL, GL_COMPILE);
 	drawSecondWall();
 	glEndList();
-
+//mouse coords
+	glutPassiveMotionFunc(initMouse);
 
 }
 
@@ -262,8 +238,12 @@ void display(void)
 
 	eyecorrection(eyemod,rotation_bigw);
 
-//	eyecorrection(eyemod,rotation_bigw);
-	gluLookAt (eyemod[0]+eye[0], eyemod[1]+eye[1],eyemod[2]+eye[2],newX,newY,newZ , up[0], up[1], up[2]);
+	eyecorrection(eyemod,rotation_bigw);
+
+	if (camara==interna)
+		gluLookAt (eyemod[0]+eye[0], eyemod[1]+eye[1],eyemod[2]+eye[2],eyemod[0]+newX,eyemod[1]+newY,eyemod[2]+newZ , up[0], up[1], up[2]);
+	else
+		gluLookAt (newX, newY,newZ,0,0,30 , up[0], up[1], up[2]);
 	
 	if (view_grid)
 		 glCallList(DL_GRID);
@@ -401,7 +381,7 @@ void keyboard (unsigned char key, int x, int y)
       case 'q':
          exit(0);
          break;
-
+/*
 	  case 'p':
 		  view_grid = !view_grid;
 		  glutPostRedisplay();
@@ -571,6 +551,17 @@ void keyboard (unsigned char key, int x, int y)
 	case '9':
 		ms--;
 		break;
+*/
+	case 'm':
+		ms++;
+		break;
+	case 'n':
+		ms--;
+		break;
+	case 'c':
+		cameraChange();
+		break;
+
      default:
          break;
    }
@@ -595,6 +586,7 @@ int main(int argc, char** argv)
    glutKeyboardFunc(keyboard);
    glutTimerFunc(ms,Avanzar,1);
    glutPassiveMotionFunc(mouseCam);
+   glutMouseFunc(mouseButton);
 //   glutIdleFunc(OnIdle);
    glutMainLoop();
    return 0;

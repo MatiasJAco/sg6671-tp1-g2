@@ -336,23 +336,44 @@ void eyecorrection(float* e, float b){
 
 };
 
+
+void initMouse( GLint xMouse, GLint yMouse){
+			mouseX=xMouse;
+			mouseY=yMouse;
+			mouseXante=xMouse;
+			mouseYante=yMouse;
+};
+
 void mouseCam( GLint xMouse, GLint yMouse){
 
 //	if( button==GLUT_LEFT_BUTTON && action == GLUT_DOWN){
-		if(first){
+		int signo;
+		float limitbeta_UP=85;
+		float limitbeta_DOWN;
+		float auxyDelta;
+		
+		limitbeta_DOWN= camara==interna ? -85:0;
+		signo= camara==interna ? -1 : 1;
+/*		if(first){
 			mouseX=xMouse;
 			mouseY=yMouse;
 			mouseXante=xMouse;
 			mouseYante=yMouse;
 
 			first =false;
-		}else{
+
+		}else{*/
 			int difAnteX=xMouse-mouseXante;
 			int difAnteY=yMouse-mouseYante;
 			int difX=xMouse-mouseX;
 			int difY=yMouse-mouseY;
-			xDelta=(float)((difX)% 360);
-			yDelta=(float)((difY)% 360);
+
+
+			xDelta=(float)((difX)%360);
+			yDelta=(float)((difY)%360);
+//			auxyDelta=(float)((difY)%360);			
+//			if (auxyDelta < limitbeta_UP && auxyDelta > limitbeta_DOWN )
+//				yDelta=auxyDelta;
 
 			float alfa=xDelta;
 			alfa=(alfa*M_PI)/180.0;
@@ -360,15 +381,47 @@ void mouseCam( GLint xMouse, GLint yMouse){
 			beta=(beta*M_PI)/180.0;
 
 			newX=radio*cosf(alfa)*sinf(beta);
-			newY=radio*sinf(alfa)*sinf(beta);
-			newZ=radio*cosf(beta);
+			newY=signo*radio*sinf(alfa)*sinf(beta);
+			newZ=signo*radio*cosf(beta);
 
 			mouseXante=xMouse;
 			mouseYante=yMouse;
 
-		};
+//		};
 
 
 	};
 
+void mouseButton( int boton, int mode, int x, int y){
+	if (mode==GLUT_UP)
+		cameraChange();
+	return;
+}
 
+
+void cameraChange(){
+		if (camara==interna){
+			camara=externa;
+			initExtCam();
+		}
+		else{
+			camara=interna;
+			initIntCam();
+		}
+	
+	return;
+};
+
+void initExtCam(){
+	eye[0]=32;
+	eye[1]=0;
+	eye[2]=0;
+//	glutPassiveMotionFunc(initMouse);
+};
+
+void initIntCam(){
+	eye[0]=0;
+	eye[1]=0;
+	eye[2]=0;
+//	glutPassiveMotionFunc(initMouse);
+};
