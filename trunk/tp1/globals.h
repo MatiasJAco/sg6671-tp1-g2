@@ -2,6 +2,8 @@
 
 #include <GL/glut.h>
 
+typedef enum  {interna, externa} camMod;
+
 extern GLuint cilindro_base;
 extern GLuint pieza_rueda_chica;
 extern GLuint pieza_rueda_grande;
@@ -27,3 +29,19 @@ extern float alfa;
 extern float beta;
 extern float radio;
 extern bool first;
+
+extern camMod camara;
+
+// Variables que controlan la ubicación de la cámara en la Escena 3D
+extern float eye[3];
+extern float at[3];
+extern float up[3];
+// Variables asociadas a única fuente de luz de la escena
+extern float light_color[4];
+extern float light_position[3];
+extern float light_ambient[4];
+// Color de la esfera en movimiento dentro de la escena
+// Variables de control
+extern bool view_grid;
+extern bool view_axis;
+extern bool edit_panel;
