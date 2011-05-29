@@ -1,7 +1,28 @@
 //#include <GL/gl.h>
 //#include <GL/glu.h>
+#define GLUT_DISABLE_ATEXIT_HACK
 #include <GL/glut.h>
 #include <math.h>
+//Algunas variables globales usadas para bezier  TODO:Aprolijar
+GLsizei winWidth = 1024;
+GLsizei winHeight = 768;
+int puntos = 0;
+#define MAXVERTICES 60
+bool primera=false;
+
+typedef struct
+{
+float x;
+float y;
+}tVertice; // vertices
+tVertice atVertices[MAXVERTICES]; // vertices
+ int gnContVert = 0; //Contadores
+
+GLfloat ctrlpoints[4][3] = {
+        { -4.0, -4.0, 0.0}, { -1.0, 2.0, 0.0},
+        {1.0, 3.5, 0.0}, {4.0, 4.0, 0.0}};
+
+
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
 float eye[3] = {15.0, 15.0, 5.0};
@@ -51,7 +72,100 @@ void OnIdle (void)
 {
 	rotate_sphere += 0.1;
 	if(rotate_sphere > 360.0) rotate_sphere = 0.0;
-    glutPostRedisplay();
+//    glutPostRedisplay();
+}
+bool isInRangeA(int x, int y){
+	bool result = false;
+	if((x >= TOP_VIEWA_POSX)&&(x <= TOP_VIEWA_POSX+TOP_VIEWA_W)&&(y >= TOP_VIEWA_POSY)&&(y <=(TOP_VIEWA_POSY+TOP_VIEWA_H)))
+		result=true;
+	return result;
+}
+bool isInRangeB(int x, int y){
+	bool result = false;
+	if((x >= TOP_VIEWB_POSX)&&(x <= TOP_VIEWB_POSX+TOP_VIEWB_W)&&(y >= TOP_VIEWB_POSY)&&(y <=(TOP_VIEWB_POSY+TOP_VIEWB_H)))
+		result=true;
+	return result;
+}
+
+bool isInRange(int x, int y){
+	bool result=false;
+	if( isInRangeA(x,y) || isInRangeB(x,y) )
+		result = true;
+	return result;
+}
+
+
+float convCoorXPanelA(GLint xMouse){
+	float valor;
+	valor=((float)(xMouse-TOP_VIEWA_POSX))/TOP_VIEWA_W;
+	return valor;
+}
+float convCoorXPanelB(GLint xMouse){
+	float valor;
+	valor=((float)(xMouse-TOP_VIEWB_POSX))/TOP_VIEWB_W;
+	return valor;
+}
+float convCoorYPanelA(GLint yMouse){
+	float valor;
+	valor=((float)(yMouse-TOP_VIEWA_POSY))/TOP_VIEWA_H;
+	return valor;
+}
+float convCoorYPanelB(GLint yMouse){
+	float valor;
+	valor=((float)(yMouse-TOP_VIEWB_POSY))/TOP_VIEWB_H;
+	return valor;
+}
+
+
+
+void curvaBezier(){
+    int i;
+    if(gnContVert >3 ||(primera && gnContVert>2)){
+    	if(!primera){
+    		for (int j=0;j<gnContVert; j++){
+    			ctrlpoints[j][0]=atVertices[j].x;
+    			ctrlpoints[j][1]=atVertices[j].y;
+    			ctrlpoints[j][2]=0.0;
+    		}
+    	} else {
+    		for (int j=0;j<gnContVert; j++){
+    			ctrlpoints[j+1][0]=atVertices[j].x;
+    			ctrlpoints[j+1][1]=atVertices[j].y;
+    			ctrlpoints[j+1][2]=0.0;
+    		}
+    	}
+    	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &ctrlpoints[0][0]);
+    	glMapGrid1f(600, 0.0, 1.0);
+    	glEnable(GL_MAP1_VERTEX_3);
+    	glColor3f(1.0, 1.0, 0.0);
+    	glEvalMesh1(GL_LINE, 0, 600);
+    /* Dibuja puntos de control*/
+    	glPointSize(5.0);
+    	glColor3f(1.0, 1.0, 0.0);
+    	glBegin(GL_POINTS);
+    	for (i = 0; i < gnContVert; i++)
+    		glVertex3f(atVertices[i].x,atVertices[i].y,0);
+    	glEnd();
+    	gnContVert=0;
+    //El primer punto de control de la proxima sera el ultimo de la actual.
+    	ctrlpoints[0][0]=ctrlpoints[3][0];
+    	ctrlpoints[0][1]=ctrlpoints[3][1];
+    	ctrlpoints[0][2]=ctrlpoints[3][2];
+    	primera=true;
+    }
+}
+
+void puntosDeBezier(int x, int y){
+	int limit;
+	if(!primera)
+		limit=4;
+	else
+		limit=3;
+	if (gnContVert <limit){
+		atVertices[gnContVert].x = convCoorXPanelB(x);
+		atVertices[gnContVert].y = convCoorYPanelB(y);
+		gnContVert++;
+	}
 }
 
 void DrawAxis()
@@ -204,6 +318,9 @@ void display(void)
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		gluLookAt (0, 0, 0.5, 0, 0, 0, 0, 1, 0);
+		glDisable(GL_LIGHTING);
+		curvaBezier();
+		glEnable(GL_LIGHTING);
 		glCallList(DL_AXIS2D_TOP);
 	}
 	//
@@ -248,6 +365,22 @@ void keyboard (unsigned char key, int x, int y)
    }
 }
 
+
+void mousePtPlot (GLint button, GLint action, GLint xMouse, GLint yMouse) {
+	int coorY=winHeight-yMouse;
+	if(button == GLUT_LEFT_BUTTON && action == GLUT_DOWN){
+		if(isInRange(xMouse,coorY)) {
+			//Si esta en el panel B,almacena puntos para Bezier
+			if(isInRangeB(xMouse,coorY)){
+				puntosDeBezier(xMouse,coorY);
+			} else {
+				//Se puede hacer una pfuncion para capturar puntos B-Spline
+			}
+		}
+	}
+
+}
+
 int main(int argc, char** argv)
 {
    glutInit(&argc, argv);
@@ -261,6 +394,7 @@ int main(int argc, char** argv)
    glutDisplayFunc(display); 
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
+   glutMouseFunc(mousePtPlot);
    glutIdleFunc(OnIdle);
    glutMainLoop();
    return 0;
