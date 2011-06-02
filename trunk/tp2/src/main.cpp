@@ -21,6 +21,8 @@ float y;
 }tVertice; // vertices
 tVertice atVertices[MAXVERTICES]; // vertices
  int gnContVert = 0; //Contadores
+ int cuentaTramos = 0;
+ int cuentaControl = 0;
 
 GLfloat ctrlpoints[4][3] = {
         { -4.0, -4.0, 0.0}, { -1.0, 2.0, 0.0},
@@ -119,21 +121,18 @@ float convCoorYPanelB(GLint yMouse){
 
 
 void curvaBezier(){
-    int i;
+
     if(gnContVert >3 ||(primera && gnContVert>2)){
-    	if(!primera){
-    		for (int j=0;j<gnContVert; j++){
-    			ctrlpoints[j][0]=atVertices[j].x;
-    			ctrlpoints[j][1]=atVertices[j].y;
+    	cuentaTramos++;
+    	gnContVert=0;
+    	primera=true;
+    }
+    	for(int t=0;t<cuentaTramos;t++){
+    		for (int j=0;j<4; j++){
+    			ctrlpoints[j][0]=atVertices[(j+t*3)].x;
+    			ctrlpoints[j][1]=atVertices[(j+t*3)].y;
     			ctrlpoints[j][2]=0.0;
     		}
-    	} else {
-    		for (int j=0;j<gnContVert; j++){
-    			ctrlpoints[j+1][0]=atVertices[j].x;
-    			ctrlpoints[j+1][1]=atVertices[j].y;
-    			ctrlpoints[j+1][2]=0.0;
-    		}
-    	}
     	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &ctrlpoints[0][0]);
     	glMapGrid1f(600, 0.0, 1.0);
     	glEnable(GL_MAP1_VERTEX_3);
@@ -143,16 +142,13 @@ void curvaBezier(){
     	glPointSize(5.0);
     	glColor3f(1.0, 1.0, 0.0);
     	glBegin(GL_POINTS);
-    	for (i = 0; i < gnContVert; i++)
-    		glVertex3f(atVertices[i].x,atVertices[i].y,0);
+    	for (int i = 0; i < 4; i++)
+    		glVertex3f(atVertices[i+t*3].x,atVertices[i+t*3].y,0);
     	glEnd();
-    	gnContVert=0;
-    //El primer punto de control de la proxima sera el ultimo de la actual.
-    	ctrlpoints[0][0]=ctrlpoints[3][0];
-    	ctrlpoints[0][1]=ctrlpoints[3][1];
-    	ctrlpoints[0][2]=ctrlpoints[3][2];
-    	primera=true;
-    }
+    	};
+
+
+
 }
 
 void puntosDeBezier(int x, int y){
@@ -162,9 +158,10 @@ void puntosDeBezier(int x, int y){
 	else
 		limit=3;
 	if (gnContVert <limit){
-		atVertices[gnContVert].x = convCoorXPanelB(x);
-		atVertices[gnContVert].y = convCoorYPanelB(y);
+		atVertices[cuentaControl].x = convCoorXPanelB(x);
+		atVertices[cuentaControl].y = convCoorYPanelB(y);
 		gnContVert++;
+		cuentaControl++;
 	}
 }
 
@@ -335,6 +332,8 @@ void display(void)
 
 	if (edit_panelB)
 	{
+//		glEnable(GL_COLOR_MATERIAL);
+//			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 		SetPanelTopEnvB();
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
