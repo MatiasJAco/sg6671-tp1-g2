@@ -3,7 +3,14 @@
 #define GLUT_DISABLE_ATEXIT_HACK
 #include <GL/glut.h>
 #include <math.h>
+#include "spline_test/spline.h"
 //Algunas variables globales usadas para bezier  TODO:Aprolijar
+
+//XXX:Esto esta mal, Las variables ya estan macreadas mas abajo:  W_WIDTH
+GLfloat window_size[2];
+#define W_WIDTH window_size[0]
+#define W_HEIGHT window_size[1]
+
 GLsizei winWidth = 1024;
 GLsizei winHeight = 768;
 int puntos = 0;
@@ -22,7 +29,8 @@ GLfloat ctrlpoints[4][3] = {
         { -4.0, -4.0, 0.0}, { -1.0, 2.0, 0.0},
         {1.0, 3.5, 0.0}, {4.0, 4.0, 0.0}};
 
-
+//Puntos de control de la spline.
+vector<float> ctlVectorSpline;
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
 float eye[3] = {15.0, 15.0, 5.0};
@@ -33,12 +41,6 @@ float up[3]  = { 0.0,  0.0, 1.0};
 float light_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 float light_position[3] = {10.0f, 10.0f, 8.0f};
 float light_ambient[4] = {0.05f, 0.05f, 0.05f, 1.0f};
-
-// Color de la esfera en movimiento dentro de la escena
-float color_esfera[4] = {0.5f, 0.5f, 0.2f, 1.0f};
-
-// Variable asociada al movimiento de rotación de la esfera alrededor del eje Z
-float rotate_sphere = 0;
 
 // Variables de control
 bool view_grid = true;
@@ -54,25 +56,26 @@ GLuint dl_handle;
 #define DL_AXIS2D_TOP (dl_handle+2)
 
 // Tamaño de la ventana
-GLfloat window_size[2];
-#define W_WIDTH window_size[0]
-#define W_HEIGHT window_size[1]
+//TODO:Tratar de obtener los valores automagicamente con glut.
 
-#define TOP_VIEWA_POSX	((int)((float)W_WIDTH*0.60f))
-#define TOP_VIEWA_W		((int)((float)W_WIDTH*0.40f))
+//XXX:Cambie para que quede proporcional:
+#define TOP_VIEWA_POSX	((int)((float)W_WIDTH-W_HEIGHT*0.40f))
+#define TOP_VIEWA_W		((int)((float)W_HEIGHT*0.35f))
 #define TOP_VIEWA_POSY	((int)((float)W_HEIGHT*0.60f))
-#define TOP_VIEWA_H		((int)((float)W_HEIGHT*0.40f))
+#define TOP_VIEWA_H		((int)((float)W_HEIGHT*0.35f))
 
-#define TOP_VIEWB_POSX	((int)((float)W_WIDTH*0.60f))
-#define TOP_VIEWB_W		((int)((float)W_WIDTH*0.40f))
+#define TOP_VIEWB_POSX	((int)((float)W_WIDTH-W_HEIGHT*0.40f))
+#define TOP_VIEWB_W		((int)((float)W_HEIGHT*0.35f))
 #define TOP_VIEWB_POSY	((int)((float)W_HEIGHT*0.20f))
-#define TOP_VIEWB_H		((int)((float)W_HEIGHT*0.40f))
+#define TOP_VIEWB_H		((int)((float)W_HEIGHT*0.35f))
+
 
 void OnIdle (void)
 {
-	rotate_sphere += 0.1;
-	if(rotate_sphere > 360.0) rotate_sphere = 0.0;
-//    glutPostRedisplay();
+//	rotate_sphere += 0.1;
+//	if(rotate_sphere > 360.0) rotate_sphere = 0.0;
+//XXX:por ahora vuelvo a activar el post redisplay.
+glutPostRedisplay();
 }
 bool isInRangeA(int x, int y){
 	bool result = false;
@@ -168,6 +171,11 @@ void puntosDeBezier(int x, int y){
 	}
 }
 
+void puntosDeSpline(int x, int y){
+	ctlVectorSpline.push_back(convCoorXPanelA(x));
+	ctlVectorSpline.push_back(convCoorYPanelA(y));
+}
+
 void DrawAxis()
 {
 	glDisable(GL_LIGHTING);
@@ -243,7 +251,7 @@ void SetPanelTopEnvA()
 	glViewport (TOP_VIEWA_POSX, TOP_VIEWA_POSY, (GLsizei) TOP_VIEWA_W, (GLsizei) TOP_VIEWA_H); 
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
-	gluOrtho2D(-0.10, 1.05, -0.10, 1.05);
+	gluOrtho2D(0, 1, 0, 1);
 }
 
 void SetPanelTopEnvB()
@@ -251,7 +259,7 @@ void SetPanelTopEnvB()
 	glViewport (TOP_VIEWB_POSX, TOP_VIEWB_POSY, (GLsizei) TOP_VIEWB_W, (GLsizei) TOP_VIEWB_H); 
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
-	gluOrtho2D(-0.10, 1.05, -0.10, 1.05);
+	gluOrtho2D(0, 1, 0, 1);
 }
 
 void init(void) 
@@ -309,6 +317,19 @@ void display(void)
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		gluLookAt (0, 0, 0.5, 0, 0, 0, 0, 1, 0);
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+            glEnable(GL_POINT_SMOOTH);
+            glEnable (GL_BLEND);
+
+		glPointSize(10.0);
+            glColor3f(0, 0.8, 0);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2,GL_FLOAT,0,&ctlVectorSpline[0]);
+		glDrawArrays(GL_POINTS,0,ctlVectorSpline.size()/2);
+
+
 		glCallList(DL_AXIS2D_TOP);
 	}
 
@@ -367,25 +388,26 @@ void keyboard (unsigned char key, int x, int y)
 
 
 void mousePtPlot (GLint button, GLint action, GLint xMouse, GLint yMouse) {
-	int coorY=winHeight-yMouse;
+	int coorY=W_HEIGHT-yMouse;
 	if(button == GLUT_LEFT_BUTTON && action == GLUT_DOWN){
-		if(isInRange(xMouse,coorY)) {
 			//Si esta en el panel B,almacena puntos para Bezier
 			if(isInRangeB(xMouse,coorY)){
 				puntosDeBezier(xMouse,coorY);
-			} else {
-				//Se puede hacer una pfuncion para capturar puntos B-Spline
+			}
+			else if(isInRangeA(xMouse,coorY)){
+				puntosDeSpline(xMouse,coorY);
+			}
+			else{/*posible funcion para 3Dviewport*/}
 			}
 		}
-	}
-
-}
 
 int main(int argc, char** argv)
 {
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize (1024, 768); 
+   W_WIDTH=glutGet(GLUT_SCREEN_WIDTH);
+   W_HEIGHT=glutGet(GLUT_SCREEN_HEIGHT);
+   glutInitWindowSize (W_WIDTH, W_HEIGHT); 
    glutInitWindowPosition (0, 0);
    
    glutCreateWindow (argv[0]);
@@ -399,3 +421,4 @@ int main(int argc, char** argv)
    glutMainLoop();
    return 0;
 }
+
