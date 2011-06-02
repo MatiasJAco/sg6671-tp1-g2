@@ -6,13 +6,10 @@
 #include "spline_test/spline.h"
 //Algunas variables globales usadas para bezier  TODO:Aprolijar
 
-//XXX:Esto esta mal, Las variables ya estan macreadas mas abajo:  W_WIDTH
 GLfloat window_size[2];
 #define W_WIDTH window_size[0]
 #define W_HEIGHT window_size[1]
 
-GLsizei winWidth = 1024;
-GLsizei winHeight = 768;
 int puntos = 0;
 #define MAXVERTICES 60
 bool primera=false;
@@ -75,7 +72,7 @@ void OnIdle (void)
 //	rotate_sphere += 0.1;
 //	if(rotate_sphere > 360.0) rotate_sphere = 0.0;
 //XXX:por ahora vuelvo a activar el post redisplay.
-glutPostRedisplay();
+//glutPostRedisplay();
 }
 bool isInRangeA(int x, int y){
 	bool result = false;
@@ -319,11 +316,14 @@ void display(void)
 		gluLookAt (0, 0, 0.5, 0, 0, 0, 0, 1, 0);
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-            glEnable(GL_POINT_SMOOTH);
-            glEnable (GL_BLEND);
+		/*Round Points??*/
+		glEnable(GL_POINT_SMOOTH);
+		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+		glEnable (GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glPointSize(10.0);
-            glColor3f(0, 0.8, 0);
+		glColor3f(0, 0.8, 0);
 
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2,GL_FLOAT,0,&ctlVectorSpline[0]);
@@ -399,6 +399,7 @@ void mousePtPlot (GLint button, GLint action, GLint xMouse, GLint yMouse) {
 			}
 			else{/*posible funcion para 3Dviewport*/}
 			}
+		glutPostRedisplay();
 		}
 
 int main(int argc, char** argv)
