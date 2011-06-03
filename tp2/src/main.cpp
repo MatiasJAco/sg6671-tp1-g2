@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include "spline_test/spline.h"
+#include "bezier.h"
 //Algunas variables globales usadas para bezier  TODO:Aprolijar
 
 GLfloat window_size[2];
@@ -11,14 +12,11 @@ GLfloat window_size[2];
 #define W_HEIGHT window_size[1]
 
 int puntos = 0;
+
 #define MAXVERTICES 60
 bool primera=false;
 
-typedef struct
-{
-float x;
-float y;
-}tVertice; // vertices
+
 tVertice atVertices[MAXVERTICES]; // vertices
  int gnContVert = 0; //Contadores
  int cuentaTramos = 0;
@@ -46,13 +44,14 @@ bool view_grid = true;
 bool view_axis = true;
 bool edit_panelA = true;
 bool edit_panelB = true;
-
+bool superficieBezier=false;
 
 // Handle para el control de las Display Lists
 GLuint dl_handle;
 #define DL_AXIS (dl_handle+0)
 #define DL_GRID (dl_handle+1)
 #define DL_AXIS2D_TOP (dl_handle+2)
+//#define DL_SBEZIER (dl_handle+3)
 
 // Tamaño de la ventana
 //TODO:Tratar de obtener los valores automagicamente con glut.
@@ -162,6 +161,7 @@ void puntosDeBezier(int x, int y){
 		atVertices[cuentaControl].y = convCoorYPanelB(y);
 		gnContVert++;
 		cuentaControl++;
+
 	}
 }
 
@@ -192,6 +192,7 @@ void DrawAxis()
 	glEnd();
 	glEnable(GL_LIGHTING);
 }
+
 
 void DrawAxis2DTopView()
 {
@@ -234,7 +235,7 @@ void DrawXYGrid()
 }
 void Set3DEnv()
 {
-	glViewport (0, 0, (GLsizei) W_WIDTH, (GLsizei) W_HEIGHT); 
+	glViewport (0, 0, (GLsizei) W_WIDTH, (GLsizei) W_HEIGHT);
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
     gluPerspective(60.0, (GLfloat) W_WIDTH/(GLfloat) W_HEIGHT, 0.10, 100.0);
@@ -242,7 +243,7 @@ void Set3DEnv()
 
 void SetPanelTopEnvA()
 {
-	glViewport (TOP_VIEWA_POSX, TOP_VIEWA_POSY, (GLsizei) TOP_VIEWA_W, (GLsizei) TOP_VIEWA_H); 
+	glViewport (TOP_VIEWA_POSX, TOP_VIEWA_POSY, (GLsizei) TOP_VIEWA_W, (GLsizei) TOP_VIEWA_H);
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
 	gluOrtho2D(0, 1, 0, 1);
@@ -250,13 +251,13 @@ void SetPanelTopEnvA()
 
 void SetPanelTopEnvB()
 {
-	glViewport (TOP_VIEWB_POSX, TOP_VIEWB_POSY, (GLsizei) TOP_VIEWB_W, (GLsizei) TOP_VIEWB_H); 
+	glViewport (TOP_VIEWB_POSX, TOP_VIEWB_POSY, (GLsizei) TOP_VIEWB_W, (GLsizei) TOP_VIEWB_H);
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
 	gluOrtho2D(0, 1, 0, 1);
 }
 
-void init(void) 
+void init(void)
 {
 	dl_handle = glGenLists(3);
 
@@ -279,6 +280,9 @@ void init(void)
 	glNewList(DL_AXIS2D_TOP, GL_COMPILE);
 		DrawAxis2DTopView();
 	glEndList();
+//	glNewList(DL_SBEZIER, GL_COMPILE);
+//			DrawSupBezier();
+//	glEndList();
 }
 
 
@@ -293,14 +297,26 @@ void display(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt (eye[0], eye[1], eye[2], at[0], at[1], at[2], up[0], up[1], up[2]);
-   
+
 	if (view_axis)
 		 glCallList(DL_AXIS);
-	
+
 	if (view_grid)
 		 glCallList(DL_GRID);
 	//
 	///////////////////////////////////////////////////
+	if(superficieBezier){
+				glEnable(GL_COLOR_MATERIAL);
+					glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+		glColor3f(1.0,1.0,0.5);
+//		glDisable(GL_LIGHTING);
+//		glScalef(2.0,2.0,2.0);
+		dibujaSupBezier(atVertices,0.125,10,cuentaTramos);
+
+//		glEnable(GL_LIGHTING);
+	}
+
+
 
 
 	///////////////////////////////////////////////////
@@ -345,7 +361,7 @@ void display(void)
 	}
 	//
 	///////////////////////////////////////////////////
-	
+
 
 	glutSwapBuffers();
 }
@@ -362,6 +378,7 @@ void keyboard (unsigned char key, int x, int y)
       case 'q':
          exit(0);
          break;
+
 	  case 'g':
 		  view_grid = !view_grid;
 		  glutPostRedisplay();
@@ -369,6 +386,11 @@ void keyboard (unsigned char key, int x, int y)
 
 	  case 'a':
 		  view_axis = !view_axis;
+		  glutPostRedisplay();
+		  break;
+
+	  case '3':
+		  superficieBezier =! superficieBezier;
 		  glutPostRedisplay();
 		  break;
 
@@ -407,13 +429,13 @@ int main(int argc, char** argv)
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
    W_WIDTH=glutGet(GLUT_SCREEN_WIDTH);
    W_HEIGHT=glutGet(GLUT_SCREEN_HEIGHT);
-   glutInitWindowSize (W_WIDTH, W_HEIGHT); 
+   glutInitWindowSize (W_WIDTH, W_HEIGHT);
    glutInitWindowPosition (0, 0);
-   
+
    glutCreateWindow (argv[0]);
    glutFullScreen();
    init ();
-   glutDisplayFunc(display); 
+   glutDisplayFunc(display);
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
    glutMouseFunc(mousePtPlot);
