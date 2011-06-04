@@ -1,4 +1,4 @@
-#define CONTROL_POINT_ELEMENTS 2
+#define CONTROL_POINT_ELEMENTS 2 //Posible expancion a 3D
 #define ITERACIONES_LIMITE 30
 #define STEP 0.3
 #include "spline.h"
@@ -126,13 +126,13 @@ vector<float> splineNormal2D(float u, const vector<float> & controlPoints){
 	return outputVector;
 }
 
-vector<float> calcularPuntos(vector<float> & controlPoints){
+vector<float> calcularPuntosSpline(vector<float> & controlPoints, float step){
 	vector<float> outputVector;
 	vector<float> auxVector;
 	float n=controlPoints.size()/CONTROL_POINT_ELEMENTS;
 	float j=0;
 
-	for (j=0;j<n;j+=STEP){
+	for (j=0;j<n;j+=step){
 		auxVector=splinePoint2D(j, controlPoints);
 		outputVector.insert( outputVector.end(), auxVector.begin(), auxVector.end() );
 	}
@@ -142,7 +142,7 @@ vector<float> calcularPuntos(vector<float> & controlPoints){
 
 
 
-vector<float> calcularPuntosEquiespaciados2D(vector<float> & controlPoints, float paso, float tolerancia){
+vector<float> calcularPuntosSplineEquiespaciados2D(vector<float> & controlPoints, float paso, float tolerancia){
 
 	bool exitFlag=false;
 	vector<float> outputVector;

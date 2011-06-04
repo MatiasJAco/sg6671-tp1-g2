@@ -21,14 +21,6 @@
 #define checkImageWidth 64
 #define checkImageHeight 64
 
-static GLuint texName;
-GLubyte checkImage[checkImageHeight][checkImageWidth][4];
-
-GLUnurbsObj *theNurb;
-//GLfloat ctlpoints[4][4][3];
-//GLfloat ctlpoints[26][3]={{0,0,0},{1,0,1},{2,0,2},{3,0,3},{4,0,4},{5,0,5},{6,0,4},{7,0,3},{8,0,2},{9,0,1}};
-float ctlpoints[26][2]={{0,1},{1,0},{0,-5},{-1,0}};
-GLuint lista;
 
 void makeCheckImage(void)
 {
