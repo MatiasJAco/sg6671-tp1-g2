@@ -4,7 +4,13 @@
 #include <GL/glut.h>
 #include <math.h>
 #include "spline_test/spline.h"
-#include "bezier.h"
+#include "bezier_test/bezier.h"
+#include "globals.h"
+
+
+//Testing 3D:
+#define SSOLID_H 1
+GLuint dl_3D;
 //Algunas variables globales usadas para bezier  TODO:Aprolijar
 
 GLfloat window_size[2];
@@ -27,7 +33,8 @@ GLfloat ctrlpoints[4][3] = {
         {1.0, 3.5, 0.0}, {4.0, 4.0, 0.0}};
 
 //Puntos de control de la spline.
-vector<float> ctlVectorSpline;
+//vector<float> ctlVectorSpline;
+
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
 float eye[3] = {15.0, 15.0, 5.0};
@@ -56,7 +63,6 @@ GLuint dl_handle;
 // Tamaño de la ventana
 //TODO:Tratar de obtener los valores automagicamente con glut.
 
-//XXX:Cambie para que quede proporcional:
 #define TOP_VIEWA_POSX	((int)((float)W_WIDTH-W_HEIGHT*0.40f))
 #define TOP_VIEWA_W		((int)((float)W_HEIGHT*0.35f))
 #define TOP_VIEWA_POSY	((int)((float)W_HEIGHT*0.60f))
@@ -67,6 +73,22 @@ GLuint dl_handle;
 #define TOP_VIEWB_POSY	((int)((float)W_HEIGHT*0.20f))
 #define TOP_VIEWB_H		((int)((float)W_HEIGHT*0.35f))
 
+//TEXTURA
+
+void makeCheckImage(void)
+{
+   int i, j, c;
+
+   for (i = 0; i < checkImageHeight; i++) {
+      for (j = 0; j < checkImageWidth; j++) {
+         c = ((((i&0x8)==0)^((j&0x8))==0))*255;
+         checkImage[i][j][0] = (GLubyte) c;
+         checkImage[i][j][1] = (GLubyte) c;
+         checkImage[i][j][2] = (GLubyte) c;
+         checkImage[i][j][3] = (GLubyte) 255;
+      }
+   }
+}
 
 void OnIdle (void)
 {
@@ -150,6 +172,93 @@ void curvaBezier(){
 
 }
 
+void drawSolidSweep(vector<float> & ctlVector){
+
+	vector<float> pointsVector;
+	float * coordsArray;
+	size_t i;
+
+	
+	pointsVector=calcularPuntosSplineEquiespaciados2D(ctlVector,0.1);
+
+	coordsArray=new float[pointsVector.size()/4*16];//3Coord,3Norm,2Text
+
+	for (i=0; i < pointsVector.size()/4; i++){
+		//CoordInferior
+		coordsArray[i*16+0]=pointsVector[i*4];
+		coordsArray[i*16+1]=pointsVector[i*4+1];
+		coordsArray[i*16+2]=0;
+		//Normal
+		coordsArray[i*16+3]=pointsVector[i*4+2];
+		coordsArray[i*16+4]=pointsVector[i*4+3];
+		coordsArray[i*16+5]=0;
+		//TexCoord
+		coordsArray[i*16+6]=i/10.0;
+		coordsArray[i*16+7]=0;
+		
+		//CoordSuperior
+		coordsArray[i*16+8]=pointsVector[i*4];
+		coordsArray[i*16+9]=pointsVector[i*4+1];
+		coordsArray[i*16+10]=SSOLID_H;
+		//Normal
+		coordsArray[i*16+11]=pointsVector[i*4+2];
+		coordsArray[i*16+12]=pointsVector[i*4+3];
+		coordsArray[i*16+13]=0;
+		
+		//TexCoord
+		coordsArray[i*16+14]=i/10.0;
+		coordsArray[i*16+15]=SSOLID_H;
+		
+	}
+	
+
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	glBindTexture(GL_TEXTURE_2D, texName);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	
+	glVertexPointer(3,GL_FLOAT,8*sizeof(float),coordsArray);
+	glNormalPointer(GL_FLOAT,8*sizeof(float),&coordsArray[3]);
+	glTexCoordPointer(2,GL_FLOAT,8*sizeof(float),&coordsArray[6]);
+		
+	glColor3f(0.2,0.8,0.8);
+		
+	glPushMatrix();
+		glTranslatef(-0.5,-0.5,0);	
+		glDrawArrays(GL_TRIANGLE_STRIP,0,pointsVector.size()/4*2);
+	glPopMatrix();
+	
+	glDisable(GL_TEXTURE_2D);
+	delete coordsArray;
+
+}
+
+
+
+void drawPanelACurve(){
+	
+	vector<float> panelASpline;
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+	glEnable (GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glPointSize(5.0);
+	glColor3f(0, 0.8, 0);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2,GL_FLOAT,0,&ctlVectorSpline[0]);
+		glDrawArrays(GL_POINTS,0,ctlVectorSpline.size()/2);
+
+	panelASpline=calcularPuntosSpline(ctlVectorSpline);
+	glColor3f(1, 1, 0.5);
+		glVertexPointer(2,GL_FLOAT,0,&panelASpline[0]);
+		glDrawArrays(GL_LINE_LOOP,0,panelASpline.size()/2);
+}
+
 void puntosDeBezier(int x, int y){
 	int limit;
 	if(!primera)
@@ -163,11 +272,6 @@ void puntosDeBezier(int x, int y){
 		cuentaControl++;
 
 	}
-}
-
-void puntosDeSpline(int x, int y){
-	ctlVectorSpline.push_back(convCoorXPanelA(x));
-	ctlVectorSpline.push_back(convCoorYPanelA(y));
 }
 
 void DrawAxis()
@@ -251,24 +355,46 @@ void SetPanelTopEnvA()
 
 void SetPanelTopEnvB()
 {
-	glViewport (TOP_VIEWB_POSX, TOP_VIEWB_POSY, (GLsizei) TOP_VIEWB_W, (GLsizei) TOP_VIEWB_H);
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
+	glViewport (TOP_VIEWB_POSX, TOP_VIEWB_POSY,
+		     	(GLsizei) TOP_VIEWB_W, (GLsizei) TOP_VIEWB_H);
+	glMatrixMode (GL_PROJECTION);
+	glLoadIdentity ();
 	gluOrtho2D(0, 1, 0, 1);
 }
 
 void init(void)
 {
+	//Iniciacion de Textura
+	makeCheckImage();
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glGenTextures(1, &texName);
+	glBindTexture(GL_TEXTURE_2D, texName);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, checkImageWidth,
+			checkImageHeight,0, GL_RGBA, GL_UNSIGNED_BYTE, checkImage);
+
+	
+	//Asignacion de las listas:
 	dl_handle = glGenLists(3);
+	dl_curvaSpline=glGenLists(1);
+	dl_curvaBezier=glGenLists(1);
+	dl_3D=glGenLists(1);//XXX:VARIABLE DE PRUEBA
+
+
 
 	glClearColor (0.02, 0.02, 0.04, 0.0);
-    glShadeModel (GL_SMOOTH);
-    glEnable(GL_DEPTH_TEST);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_LIGHTING);
+	glShadeModel (GL_SMOOTH);
+	glEnable(GL_DEPTH_TEST);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
 
 	// Generación de las Display Lists
 	glNewList(DL_AXIS, GL_COMPILE);
@@ -309,12 +435,16 @@ void display(void)
 				glEnable(GL_COLOR_MATERIAL);
 					glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 		glColor3f(1.0,1.0,0.5);
-//		glDisable(GL_LIGHTING);
-//		glScalef(2.0,2.0,2.0);
+		glDisable(GL_LIGHTING);
+		glScalef(2.0,2.0,2.0);
 		dibujaSupBezier(atVertices,0.125,10,cuentaTramos);
 
-//		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHTING);
 	}
+
+		glCallList(dl_3D);
+	////////////////////////////////////////////////////
+	
 
 
 
@@ -330,19 +460,8 @@ void display(void)
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 		/*Round Points??*/
-		glEnable(GL_POINT_SMOOTH);
-		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-		glEnable (GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glPointSize(10.0);
-		glColor3f(0, 0.8, 0);
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2,GL_FLOAT,0,&ctlVectorSpline[0]);
-		glDrawArrays(GL_POINTS,0,ctlVectorSpline.size()/2);
-
-
+		glCallList(dl_curvaSpline);
 		glCallList(DL_AXIS2D_TOP);
 	}
 
@@ -379,14 +498,22 @@ void keyboard (unsigned char key, int x, int y)
          exit(0);
          break;
 
-	  case 'g':
+	  case 'u':
 		  view_grid = !view_grid;
 		  glutPostRedisplay();
 		  break;
 
-	  case 'a':
+	  case 'r':
 		  view_axis = !view_axis;
 		  glutPostRedisplay();
+		  break;
+
+        case '4':
+		  //XXX:Prueba Spline
+		  glNewList(dl_3D, GL_COMPILE);
+		  	drawSolidSweep(ctlVectorSpline);
+              glEndList();
+              glutPostRedisplay();
 		  break;
 
 	  case '3':
@@ -400,6 +527,78 @@ void keyboard (unsigned char key, int x, int y)
 		  break;
 	  case '2':
 		  edit_panelB = !edit_panelB;
+		  glutPostRedisplay();
+		  break;
+	case 'w':
+		eye[0]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 's':
+		eye[0]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'a':
+		eye[1]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'd':
+		eye[1]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'z':
+		eye[2]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'x':
+		eye[2]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 't':
+		at[0]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'g':
+		at[0]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'f':
+		at[1]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'h':
+		at[1]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'c':
+		at[2]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'v':
+		at[2]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'i':
+		up[0]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'k':
+		up[0]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'j':
+		up[1]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'l':
+		up[1]+=1;
+		  glutPostRedisplay();
+		  break;
+	case 'n':
+		up[2]-=1;
+		  glutPostRedisplay();
+		  break;
+	case 'm':
+		up[2]+=1;
 		  glutPostRedisplay();
 		  break;
      default:
@@ -416,7 +615,13 @@ void mousePtPlot (GLint button, GLint action, GLint xMouse, GLint yMouse) {
 				puntosDeBezier(xMouse,coorY);
 			}
 			else if(isInRangeA(xMouse,coorY)){
-				puntosDeSpline(xMouse,coorY);
+				//Cargo el punto;
+				ctlVectorSpline.push_back(convCoorXPanelA(xMouse));
+				ctlVectorSpline.push_back(convCoorYPanelA(coorY));
+				//Rehago la display list
+				glNewList(dl_curvaSpline, GL_COMPILE);
+					drawPanelACurve();
+				glEndList();
 			}
 			else{/*posible funcion para 3Dviewport*/}
 			}
