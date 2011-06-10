@@ -6,7 +6,7 @@
 #include "spline_test/spline.h"
 #include "bezier_test/bezier.h"
 #include "globals.h"
-
+#include <cstdio>
 
 //Testing 3D:
 #define SSOLID_H 1
@@ -37,12 +37,12 @@ GLfloat ctrlpoints[4][3] = {
 
 
 // Variables que controlan la ubicación de la cámara en la Escena 3D
-float eye[3] = {15.0, 15.0, 5.0};
+float eye[3] = {3.0,  -1.2, 2};
 float at[3]  = { 0.0,  0.0, 0.0};
 float up[3]  = { 0.0,  0.0, 1.0};
 
 // Variables asociadas a única fuente de luz de la escena
-float light_color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+float light_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 float light_position[4] = {1.5f, 0.0f, 0.0f,0.0f};
 float light_ambient[4] = {0.05f, 0.05f, 0.05f, 1.0f};
 
@@ -90,13 +90,39 @@ void makeCheckImage(void)
    }
 }
 
-void OnIdle (void)
+/*void OnIdle (void)
 {
-//	rotate_sphere += 0.1;
-//	if(rotate_sphere > 360.0) rotate_sphere = 0.0;
-//XXX:por ahora vuelvo a activar el post redisplay.
-//glutPostRedisplay();
+	rotate += 0.1;
+	if(rotate > 360.0) rotate_sphere = 0.0;
+
+	glutPostRedisplay();
 }
+*/
+void Avanzar(int value) {
+
+	float displacement_error;
+	
+
+	rotation = (rotation + ROTATION_STEP) % 360;
+	displacement_error=at[1]-target*SOLIDS_SEPARATION;
+	if(fabsf(displacement_error)>DISPLACEMENT_TOLERANCE)
+		if (displacement_error < 0){
+			at[1]+=DISPLACEMENT_STEP;
+			eye[1]+=DISPLACEMENT_STEP;
+		}
+		else{
+			at[1]-=DISPLACEMENT_STEP;
+			eye[1]-=DISPLACEMENT_STEP;
+		}
+
+	if (animation == true)
+		glutTimerFunc(MS,Avanzar,1);
+
+	glutPostRedisplay();
+}
+
+
+
 bool isInRangeA(int x, int y){
 	bool result = false;
 	if((x >= TOP_VIEWA_POSX)&&(x <= TOP_VIEWA_POSX+TOP_VIEWA_W)&&(y >= TOP_VIEWA_POSY)&&(y <=(TOP_VIEWA_POSY+TOP_VIEWA_H)))
@@ -177,12 +203,26 @@ void drawSolidSweep(vector<float> & ctlVector){
 	vector<float> pointsVector;
 	float * coordsArray;
 	size_t i;
+	float step=0.1;
+	vector<float> ultimoPunto; //xcoord,ycoord
+	vector<float> penultimoPunto; //xcoord,ycoord
+	int textureRepeatX=1;
+	int textureRepeatY=1;
+	float textureStep;
 
 	
-	pointsVector=calcularPuntosSplineEquiespaciados2D(ctlVector,0.1);
+	pointsVector=calcularPuntosSplineEquiespaciados2D(ctlVector,step);
 
 	coordsArray=new float[pointsVector.size()/4*16];//3Coord,3Norm,2Text
 
+	//coeficiente de texturas:
+	ultimoPunto.push_back(pointsVector[pointsVector.size()-4]);
+	ultimoPunto.push_back(pointsVector[pointsVector.size()-3]);
+	penultimoPunto.push_back(pointsVector[pointsVector.size()-8]);
+	penultimoPunto.push_back(pointsVector[pointsVector.size()-7]);
+
+	textureStep=step*textureRepeatX/((pointsVector.size()/4 -2) * step + distancia2D(ultimoPunto,penultimoPunto));
+	
 	for (i=0; i < pointsVector.size()/4; i++){
 		//CoordInferior
 		coordsArray[i*16+0]=pointsVector[i*4];
@@ -193,7 +233,7 @@ void drawSolidSweep(vector<float> & ctlVector){
 		coordsArray[i*16+4]=pointsVector[i*4+3];
 		coordsArray[i*16+5]=0;
 		//TexCoord
-		coordsArray[i*16+6]=i/10.0;
+		coordsArray[i*16+6]=i*textureStep;
 		coordsArray[i*16+7]=0;
 		
 		//CoordSuperior
@@ -206,10 +246,14 @@ void drawSolidSweep(vector<float> & ctlVector){
 		coordsArray[i*16+13]=0;
 		
 		//TexCoord
-		coordsArray[i*16+14]=i/10.0;
-		coordsArray[i*16+15]=SSOLID_H;
+		coordsArray[i*16+14]=i*textureStep;
+		coordsArray[i*16+15]=textureRepeatY;
 		
 	}
+	//Corrijo la ultima textura:
+	--i;
+	coordsArray[i*16+6]=textureRepeatX;
+	coordsArray[i*16+14]=textureRepeatX;
 	
 
 	glEnable(GL_TEXTURE_2D);
@@ -359,7 +403,7 @@ void DrawXYGrid()
 }
 void Set3DEnv()
 {
-	glViewport (0, 0, (GLsizei) W_WIDTH, (GLsizei) W_HEIGHT);
+    glViewport (0, 0, (GLsizei) W_WIDTH, (GLsizei) W_HEIGHT);
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
     gluPerspective(60.0, (GLfloat) W_WIDTH/(GLfloat) W_HEIGHT, 0.10, 100.0);
@@ -387,6 +431,7 @@ void init(void)
 	//Iniciacion de Textura
 	makeCheckImage();
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	printf("deque size %i", (int) solidsList.size());
 
 	glGenTextures(1, &texName);
 	glBindTexture(GL_TEXTURE_2D, texName);
@@ -438,7 +483,6 @@ void display(void)
 	deque<GLuint>::iterator it;
 	deque<GLuint>::iterator itEnd;
 
-
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	///////////////////////////////////////////////////
 	// Escena 3D
@@ -472,8 +516,13 @@ void display(void)
 //			glCallList(dl_3D);
 		glPushMatrix();
 			for (it=solidsList.begin(), itEnd=solidsList.end(); it!=itEnd; it++){
-				glCallList(*it);
-				glTranslatef(0,2,0);
+				
+				glPushMatrix();
+					glRotatef(rotation,0,0,1);
+					glCallList(*it);
+				glPopMatrix();
+
+				glTranslatef(0,SOLIDS_SEPARATION,0);
 			}
 		glPopMatrix();
 
@@ -554,7 +603,7 @@ void keyboard (unsigned char key, int x, int y)
         case '4':
 		  //XXX:Prueba Spline
 		  
-//		  dl_3D=glGenLists(1);//XXX:VARIABLE DE PRUEBA
+		  dl_3D=glGenLists(1);//XXX:VARIABLE DE PRUEBA
 		  if (!ctlVectorSpline.empty()){
 		  	solidsList.push_back(glGenLists(1));
 		  	glNewList(solidsList.back(), GL_COMPILE);
@@ -564,6 +613,7 @@ void keyboard (unsigned char key, int x, int y)
 			
 			ctlVectorSpline.clear();
 			drawPanelACurve();
+			target=solidsList.size()-1;
 		  }
               glutPostRedisplay();
 		  break;
@@ -581,6 +631,32 @@ void keyboard (unsigned char key, int x, int y)
 		  edit_panelB = !edit_panelB;
 		  glutPostRedisplay();
 		  break;
+	  case '8':
+		  if (animation == true)
+			  animation=false;
+		  else{
+			animation=true;
+			eye[0] = 3.0;
+			eye[1] = -1.2;
+			eye[2] = 3.0;
+			at[0]  = 0.0;
+			at[1]  = 0.0;
+			at[2]  = 0.0;
+			up[0]  = 0.0;
+			up[1]  = 0.0;
+			up[2]  = 1.0;
+		  }
+	  case '9':
+		  if(target>0){
+			  target--;
+		  }
+		  break;
+	  case '0':
+		  if(target<solidsList.size()-1 && !solidsList.empty()){
+			  target++;
+		  }
+		  break;
+
 	case 'w':
 		eye[0]+=1;
 		  glutPostRedisplay();
@@ -696,7 +772,8 @@ int main(int argc, char** argv)
    glutReshapeFunc(reshape);
    glutKeyboardFunc(keyboard);
    glutMouseFunc(mousePtPlot);
-   glutIdleFunc(OnIdle);
+//   glutIdleFunc(OnIdle);
+   glutTimerFunc(MS,Avanzar,1);
    glutMainLoop();
    return 0;
 }
