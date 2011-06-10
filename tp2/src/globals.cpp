@@ -13,7 +13,6 @@ GLuint texName;
 GLubyte checkImage[checkImageHeight][checkImageWidth][4];
 
 //Animacion
-int rotation;
-bool animation;
-float currentPosition;
-int target;
+int rotation = 0;
+bool animation = true;
+int target = 0;
