@@ -12,3 +12,7 @@ extern GLuint dl_curvaSpline;
 extern GLuint dl_curvaBezier;
 extern GLuint texName;
 extern GLubyte checkImage[checkImageHeight][checkImageWidth][4];
+extern int rotation = 0;
+extern bool animation = true;
+extern float currentPosition = 0;
+extern int target = 0;

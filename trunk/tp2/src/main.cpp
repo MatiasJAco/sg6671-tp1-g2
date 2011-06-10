@@ -42,8 +42,8 @@ float at[3]  = { 0.0,  0.0, 0.0};
 float up[3]  = { 0.0,  0.0, 1.0};
 
 // Variables asociadas a única fuente de luz de la escena
-float light_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-float light_position[3] = {10.0f, 10.0f, 8.0f};
+float light_color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+float light_position[4] = {1.5f, 0.0f, 0.0f,0.0f};
 float light_ambient[4] = {0.05f, 0.05f, 0.05f, 1.0f};
 
 // Variables de control
@@ -213,7 +213,9 @@ void drawSolidSweep(vector<float> & ctlVector){
 	
 
 	glEnable(GL_TEXTURE_2D);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	glEnable(GL_BLEND);
+//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glBindTexture(GL_TEXTURE_2D, texName);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -224,7 +226,7 @@ void drawSolidSweep(vector<float> & ctlVector){
 	glNormalPointer(GL_FLOAT,8*sizeof(float),&coordsArray[3]);
 	glTexCoordPointer(2,GL_FLOAT,8*sizeof(float),&coordsArray[6]);
 		
-	glColor3f(0.2,0.8,0.8);
+	glColor3f(1,1,1);
 		
 	glPushMatrix();
 		glTranslatef(-0.5,-0.5,0);	
@@ -236,6 +238,24 @@ void drawSolidSweep(vector<float> & ctlVector){
 
 }
 
+
+void normalsTest(vector<float> & ctlVector){
+        vector<float> base;
+	vector<float> normal;
+        size_t i;
+	glPushMatrix();
+	glTranslatef(-0.5,-0.5,0);	
+	glBegin(GL_LINES);
+	for(i=0;i<ctlVector.size()/2;i++){
+		base=splinePoint2D(i,ctlVector);
+		normal=splineNormal2D(i,ctlVector);
+		
+		glVertex2fv(&base[0]);
+		glVertex2f(base[0]+normal[0],base[1]+normal[1]);
+	}
+	glEnd();
+	glPopMatrix();
+}
 
 
 void drawPanelACurve(){
@@ -383,7 +403,7 @@ void init(void)
 	dl_handle = glGenLists(3);
 	dl_curvaSpline=glGenLists(1);
 	dl_curvaBezier=glGenLists(1);
-	dl_3D=glGenLists(1);//XXX:VARIABLE DE PRUEBA
+//	dl_3D=glGenLists(1);//XXX:VARIABLE DE PRUEBA
 
 
 
@@ -391,7 +411,7 @@ void init(void)
 	glShadeModel (GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_ambient);
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
@@ -415,6 +435,10 @@ void init(void)
 
 void display(void)
 {
+	deque<GLuint>::iterator it;
+	deque<GLuint>::iterator itEnd;
+
+
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	///////////////////////////////////////////////////
 	// Escena 3D
@@ -431,9 +455,10 @@ void display(void)
 		 glCallList(DL_GRID);
 	//
 	///////////////////////////////////////////////////
+	///Bezier3D
 	if(superficieBezier){
 				glEnable(GL_COLOR_MATERIAL);
-					glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+					glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 		glColor3f(1.0,1.0,0.5);
 		glDisable(GL_LIGHTING);
 		glScalef(2.0,2.0,2.0);
@@ -441,10 +466,22 @@ void display(void)
 
 		glEnable(GL_LIGHTING);
 	}
+	///Spline 3D
+		glEnable(GL_COLOR_MATERIAL);
+		glColorMaterial(GL_FRONT, GL_DIFFUSE);
+//			glCallList(dl_3D);
+		glPushMatrix();
+			for (it=solidsList.begin(), itEnd=solidsList.end(); it!=itEnd; it++){
+				glCallList(*it);
+				glTranslatef(0,2,0);
+			}
+		glPopMatrix();
 
-		glCallList(dl_3D);
 	////////////////////////////////////////////////////
-	
+	//light:
+		glBegin(GL_POINTS);
+		glVertex3fv(light_position);
+		glEnd();
 
 
 
@@ -453,15 +490,21 @@ void display(void)
 	// Panel 2D para la vista superior
 	if (edit_panelA)
 	{
+		
+		glDisable(GL_COLOR_MATERIAL);
 		SetPanelTopEnvA();
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		gluLookAt (0, 0, 0.5, 0, 0, 0, 0, 1, 0);
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+//		glColorMaterial(GL_FRONT, GL_DIFFUSE);
 		/*Round Points??*/
 
+
+		glDisable(GL_LIGHTING);
 		glCallList(dl_curvaSpline);
+		glEnable(GL_LIGHTING);
 		glCallList(DL_AXIS2D_TOP);
 	}
 
@@ -510,9 +553,18 @@ void keyboard (unsigned char key, int x, int y)
 
         case '4':
 		  //XXX:Prueba Spline
-		  glNewList(dl_3D, GL_COMPILE);
-		  	drawSolidSweep(ctlVectorSpline);
-              glEndList();
+		  
+//		  dl_3D=glGenLists(1);//XXX:VARIABLE DE PRUEBA
+		  if (!ctlVectorSpline.empty()){
+		  	solidsList.push_back(glGenLists(1));
+		  	glNewList(solidsList.back(), GL_COMPILE);
+		  		drawSolidSweep(ctlVectorSpline);
+				//normalsTest(ctlVectorSpline);
+                  glEndList();
+			
+			ctlVectorSpline.clear();
+			drawPanelACurve();
+		  }
               glutPostRedisplay();
 		  break;
 
