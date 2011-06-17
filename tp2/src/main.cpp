@@ -198,6 +198,18 @@ void curvaBezier(){
 
 }
 
+void drawSolidRevolution(){
+	glEnable(GL_COLOR_MATERIAL);
+        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+        glDisable(GL_LIGHTING);
+	glColor3f(1.0,1.0,0.5);
+	glPushMatrix();
+//	        glScalef(2.0,2.0,2.0);
+        	dibujaSupBezier(atVertices,0.125,10,cuentaTramos);
+	glPopMatrix();  
+	glEnable(GL_LIGHTING);
+}
+
 void drawSolidSweep(vector<float> & ctlVector){
 
 	vector<float> pointsVector;
@@ -500,7 +512,7 @@ void display(void)
 	//
 	///////////////////////////////////////////////////
 	///Bezier3D
-	if(superficieBezier){
+/*	if(superficieBezier){
 				glEnable(GL_COLOR_MATERIAL);
 					glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 		glColor3f(1.0,1.0,0.5);
@@ -509,7 +521,7 @@ void display(void)
 		dibujaSupBezier(atVertices,0.125,10,cuentaTramos);
 
 		glEnable(GL_LIGHTING);
-	}
+	}*/
 	///Spline 3D
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT, GL_DIFFUSE);
@@ -601,15 +613,16 @@ void keyboard (unsigned char key, int x, int y)
 		  break;
 
         case '4':
-		  //XXX:Prueba Spline
 		  
-		  dl_3D=glGenLists(1);//XXX:VARIABLE DE PRUEBA
-		  if (!ctlVectorSpline.empty()){
+		  
+		  dl_3D=glGenLists(1);
+	  	  if (!ctlVectorSpline.empty()){
 		  	solidsList.push_back(glGenLists(1));
 		  	glNewList(solidsList.back(), GL_COMPILE);
 		  		drawSolidSweep(ctlVectorSpline);
+			
 				//normalsTest(ctlVectorSpline);
-                  glEndList();
+                  	glEndList();
 			
 			ctlVectorSpline.clear();
 			drawPanelACurve();
@@ -619,8 +632,24 @@ void keyboard (unsigned char key, int x, int y)
 		  break;
 
 	  case '3':
-		  superficieBezier =! superficieBezier;
+/*		  superficieBezier =! superficieBezier;
 		  glutPostRedisplay();
+		  break;
+*/		  
+		dl_3D=glGenLists(1);
+	
+		if ( 1 ){ //TODO:Condición de curva no nula.
+			solidsList.push_back(glGenLists(1));
+		  	glNewList(solidsList.back(), GL_COMPILE);
+		  		drawSolidRevolution();
+				//normalsTest(ctlVectorSpline);
+                  	glEndList();
+			
+			//ctlVectorSpline.clear(); //TODO:Limpiar Curva
+			//drawPanelBCurve();
+			target=solidsList.size()-1;
+		  }
+              	glutPostRedisplay();
 		  break;
 
 	  case '1':
