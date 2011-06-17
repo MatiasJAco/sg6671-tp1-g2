@@ -11,26 +11,21 @@
 //Testing 3D:
 #define SSOLID_H 1
 GLuint dl_3D;
-//Algunas variables globales usadas para bezier  TODO:Aprolijar
 
 GLfloat window_size[2];
 #define W_WIDTH window_size[0]
 #define W_HEIGHT window_size[1]
 
+int textureRepeatX=1;
+int textureRepeatY=1;
+
+//Algunas variables globales usadas para bezier
 int puntos = 0;
-
-#define MAXVERTICES 60
 bool primera=false;
-
-
-tVertice atVertices[MAXVERTICES]; // vertices
- int gnContVert = 0; //Contadores
+vector <tVertice> controlBezier; // puntos de control Bezier
+ int contControl = 0; //Contadores
  int cuentaTramos = 0;
- int cuentaControl = 0;
-
-GLfloat ctrlpoints[4][3] = {
-        { -4.0, -4.0, 0.0}, { -1.0, 2.0, 0.0},
-        {1.0, 3.5, 0.0}, {4.0, 4.0, 0.0}};
+GLfloat ctrlpointsBez[4][3];
 
 //Puntos de control de la spline.
 //vector<float> ctlVectorSpline;
@@ -61,7 +56,7 @@ GLuint dl_handle;
 //#define DL_SBEZIER (dl_handle+3)
 
 // Tamaño de la ventana
-//TODO:Tratar de obtener los valores automagicamente con glut.
+
 
 #define TOP_VIEWA_POSX	((int)((float)W_WIDTH-W_HEIGHT*0.40f))
 #define TOP_VIEWA_W		((int)((float)W_HEIGHT*0.35f))
@@ -74,22 +69,7 @@ GLuint dl_handle;
 #define TOP_VIEWB_H		((int)((float)W_HEIGHT*0.35f))
 
 //TEXTURA
-/*
-void makeCheckImage(void)
-{
-   int i, j, c;
 
-   for (i = 0; i < checkImageHeight; i++) {
-      for (j = 0; j < checkImageWidth; j++) {
-         c = ((((i&0x8)==0)^((j&0x8))==0))*255;
-         checkImage[i][j][0] = (GLubyte) c;
-         checkImage[i][j][1] = (GLubyte) c;
-         checkImage[i][j][2] = (GLubyte) c;
-         checkImage[i][j][3] = (GLubyte) 255;
-      }
-   }
-}
-*/
 
 void makeCheckImage(void)
 {
@@ -207,32 +187,38 @@ float convCoorYPanelB(GLint yMouse){
 
 
 void curvaBezier(){
-
-    if(gnContVert >3 ||(primera && gnContVert>2)){
+	if(!controlBezier.empty()){
+    if(contControl >3 ||(primera && contControl>2)){
     	cuentaTramos++;
-    	gnContVert=0;
+    	contControl=0;
     	primera=true;
     }
     	for(int t=0;t<cuentaTramos;t++){
     		for (int j=0;j<4; j++){
-    			ctrlpoints[j][0]=atVertices[(j+t*3)].x;
-    			ctrlpoints[j][1]=atVertices[(j+t*3)].y;
-    			ctrlpoints[j][2]=0.0;
+    			ctrlpointsBez[j][0]=controlBezier[(j+t*3)].x;
+    			ctrlpointsBez[j][1]=controlBezier[(j+t*3)].y;
+    			ctrlpointsBez[j][2]=0.0;
     		}
-    	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &ctrlpoints[0][0]);
+    	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &ctrlpointsBez[0][0]);
     	glMapGrid1f(600, 0.0, 1.0);
     	glEnable(GL_MAP1_VERTEX_3);
     	glColor3f(1.0, 1.0, 0.0);
     	glEvalMesh1(GL_LINE, 0, 600);
     /* Dibuja puntos de control*/
     	glPointSize(5.0);
-    	glColor3f(1.0, 1.0, 0.0);
+
     	glBegin(GL_POINTS);
-    	for (int i = 0; i < 4; i++)
-    		glVertex3f(atVertices[i+t*3].x,atVertices[i+t*3].y,0);
+
+    		glColor3f(0.0, 1.0, 0.0);
+    		glVertex3f(controlBezier[0+t*3].x,controlBezier[0+t*3].y,0);
+    		glColor3f(1.0, 0.0, 0.0);
+    		glVertex3f(controlBezier[1+t*3].x,controlBezier[1+t*3].y,0);
+    		glVertex3f(controlBezier[2+t*3].x,controlBezier[2+t*3].y,0);
+    		glColor3f(0.0, 1.0, 0.0);
+    		glVertex3f(controlBezier[3+t*3].x,controlBezier[3+t*3].y,0);
     	glEnd();
     	};
-
+	};
 
 
 }
@@ -240,13 +226,13 @@ void curvaBezier(){
 void drawSolidRevolution(){
 	glEnable(GL_COLOR_MATERIAL);
         glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-        glDisable(GL_LIGHTING);
+//        glDisable(GL_LIGHTING);
 	glColor3f(1.0,1.0,0.5);
 	glPushMatrix();
 //	        glScalef(2.0,2.0,2.0);
-        	dibujaSupBezier(atVertices,0.125,10,cuentaTramos);
+        	dibujaSupBezier(&controlBezier[0],0.125,10,cuentaTramos);
 	glPopMatrix();  
-	glEnable(GL_LIGHTING);
+//	glEnable(GL_LIGHTING);
 }
 
 void drawSolidSweep(vector<float> & ctlVector){
@@ -257,13 +243,10 @@ void drawSolidSweep(vector<float> & ctlVector){
 	float step=0.1;
 	vector<float> ultimoPunto; //xcoord,ycoord
 	vector<float> penultimoPunto; //xcoord,ycoord
-	int textureRepeatX=1;
-	int textureRepeatY=1;
 	float textureStep;
 
 	
 	pointsVector=calcularPuntosSplineEquiespaciados2D(ctlVector,step);
-
 	coordsArray=new float[pointsVector.size()/4*16];//3Coord,3Norm,2Text
 
 	//coeficiente de texturas:
@@ -273,7 +256,7 @@ void drawSolidSweep(vector<float> & ctlVector){
 	penultimoPunto.push_back(pointsVector[pointsVector.size()-7]);
 
 	textureStep=step*textureRepeatX/((pointsVector.size()/4 -2) * step + distancia2D(ultimoPunto,penultimoPunto));
-	
+
 	for (i=0; i < pointsVector.size()/4; i++){
 		//CoordInferior
 		coordsArray[i*16+0]=pointsVector[i*4];
@@ -325,7 +308,7 @@ void drawSolidSweep(vector<float> & ctlVector){
 		
 	glPushMatrix();
 		glTranslatef(-0.5,-0.5,0);	
-		glDrawArrays(GL_TRIANGLE_STRIP,0,pointsVector.size()/4*2);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, pointsVector.size()/4*2);
 	glPopMatrix();
 	
 	glDisable(GL_TEXTURE_2D);
@@ -333,11 +316,116 @@ void drawSolidSweep(vector<float> & ctlVector){
 
 }
 
+void dibujaSupBezier(tVertice* ptosControl, float paso, float angulo, int tramos){
+	vector<float> Vertices ;
+	float* coordsArray;
+	tVertice ptosControlUsados [4];
+
+	tPunto planoNormal;
+	planoNormal.x = 1;
+	planoNormal.y = 0;
+	planoNormal.z = 0;
+	angulo=10;
+	float textureStepX = (angulo/360)*textureRepeatX;
+	float textureStepY = (paso/tramos)*textureRepeatY;
+	float posTexturestepX = 0;
+
+	for(float giro =angulo;giro <= 360;giro+=angulo){
+	for(int j=0;j<tramos;j++){
+		//Carga puntos del tramo
+		ptosControlUsados[0] = ptosControl[0+(j*3)];
+		ptosControlUsados[1] = ptosControl[1+(j*3)];
+		ptosControlUsados[2] = ptosControl[2+(j*3)];
+		ptosControlUsados[3] = ptosControl[3+(j*3)];
+
+		for(float u=0.0;u<= 1.0 ;u+=paso){
+			//Primer punto para dibujar
+			tPunto punto0 =calcularPuntoDeBezier(u, ptosControlUsados);
+			punto0=rotarPunto((giro-angulo), punto0);
+			//Calculo normal del punto
+			tPunto normal0 = calcularNormal(u,ptosControlUsados,planoNormal);
+			normal0=rotarPunto((giro-angulo), normal0);
+			//Primer punto rotado
+			tPunto punto2 = rotarPunto(giro, punto0);
+			tPunto normal2 = rotarPunto(giro, normal0);
+			//Guardo los puntos
+
+			Vertices.push_back(punto0.x);
+			Vertices.push_back(punto0.y);
+			Vertices.push_back(punto0.z);
+			Vertices.push_back(normal0.x);
+			Vertices.push_back(normal0.y);
+			Vertices.push_back(normal0.z);
+			Vertices.push_back(punto2.x);
+			Vertices.push_back(punto2.y);
+			Vertices.push_back(punto2.z);
+			Vertices.push_back(normal2.x);
+			Vertices.push_back(normal2.y);
+			Vertices.push_back(normal2.z);
+		}
+	}
+	//Graficar
+	coordsArray=new float[(Vertices.size()/6)*8];//3Coord,3Norm,2Text
+	for(size_t i=0;i<Vertices.size()/12;i++){
+		//Punto
+		coordsArray[0+(i*16)] = Vertices[0+(i*12)];
+		coordsArray[1+(i*16)] = Vertices[1+(i*12)];
+		coordsArray[2+(i*16)] = Vertices[2+(i*12)];
+		//Normal
+		coordsArray[3+(i*16)] = Vertices[3+(i*12)];
+		coordsArray[4+(i*16)] = Vertices[4+(i*12)];
+		coordsArray[5+(i*16)] = Vertices[5+(i*12)];
+		//Coordenada Textura.
+		coordsArray[6+(i*16)] = posTexturestepX;
+		coordsArray[7+(i*16)] = i*textureStepY;
+
+		//Punto
+		coordsArray[8+(i*16)] = Vertices[6+(i*12)];
+		coordsArray[9+(i*16)] = Vertices[7+(i*12)];
+		coordsArray[10+(i*16)] = Vertices[8+(i*12)];
+		//Normal
+		coordsArray[11+(i*16)] = Vertices[9+(i*12)];
+		coordsArray[12+(i*16)] = Vertices[10+(i*12)];
+		coordsArray[13+(i*16)] = Vertices[11+(i*12)];
+		//Coordenada Textura.
+		coordsArray[14+(i*16)] = posTexturestepX + textureStepX;
+		coordsArray[15+(i*16)] = i*textureStepY;
+	}
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	glBindTexture(GL_TEXTURE_2D, texName);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+
+	glVertexPointer(3,GL_FLOAT,8*sizeof(float),coordsArray);
+	glNormalPointer(GL_FLOAT,8*sizeof(float),&coordsArray[3]);
+	glTexCoordPointer(2,GL_FLOAT,8*sizeof(float),&coordsArray[6]);
+	glColor3f(1,1,1);
+	glPushMatrix();
+//						glTranslatef(-0.5,-0.5,0);
+	glDrawArrays(GL_TRIANGLE_STRIP,0,Vertices.size()/6);
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+
+		Vertices.clear();
+		posTexturestepX+=textureStepX;
+	}
+	glDisableClientState(GL_VERTEX_ARRAY);
+	delete coordsArray;
+}
+
+
 
 void normalsTest(vector<float> & ctlVector){
-        vector<float> base;
+	vector<float> base;
 	vector<float> normal;
-        size_t i;
+	size_t i;
 	glPushMatrix();
 	glTranslatef(-0.5,-0.5,0);	
 	glBegin(GL_LINES);
@@ -380,12 +468,12 @@ void puntosDeBezier(int x, int y){
 		limit=4;
 	else
 		limit=3;
-	if (gnContVert <limit){
-		atVertices[cuentaControl].x = convCoorXPanelB(x);
-		atVertices[cuentaControl].y = convCoorYPanelB(y);
-		gnContVert++;
-		cuentaControl++;
-
+	if (contControl <limit){
+		tVertice nuevoPunto;
+		nuevoPunto.x = convCoorXPanelB(x);
+		nuevoPunto.y = convCoorYPanelB(y);
+		controlBezier.push_back(nuevoPunto);
+		contControl++;
 	}
 }
 
@@ -482,8 +570,6 @@ void init(void)
 	//Iniciacion de Textura
 	makeCheckImage();
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	printf("deque size %i", (int) solidsList.size());
-
 	glGenTextures(1, &texName);
 	glBindTexture(GL_TEXTURE_2D, texName);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -550,21 +636,11 @@ void display(void)
 		 glCallList(DL_GRID);
 	//
 	///////////////////////////////////////////////////
-	///Bezier3D
-/*	if(superficieBezier){
-				glEnable(GL_COLOR_MATERIAL);
-					glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-		glColor3f(1.0,1.0,0.5);
-		glDisable(GL_LIGHTING);
-		glScalef(2.0,2.0,2.0);
-		dibujaSupBezier(atVertices,0.125,10,cuentaTramos);
-
-		glEnable(GL_LIGHTING);
-	}*/
+	///
 	///Spline 3D
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT, GL_DIFFUSE);
-//			glCallList(dl_3D);
+			glCallList(dl_3D);
 		glPushMatrix();
 			for (it=solidsList.begin(), itEnd=solidsList.end(); it!=itEnd; it++){
 				
@@ -610,7 +686,7 @@ void display(void)
 
 	if (edit_panelB)
 	{
-//		glEnable(GL_COLOR_MATERIAL);
+		glEnable(GL_COLOR_MATERIAL);
 //			glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 		SetPanelTopEnvB();
 		glMatrixMode(GL_MODELVIEW);
@@ -652,17 +728,13 @@ void keyboard (unsigned char key, int x, int y)
 		  break;
 
         case '4':
-		  
-		  
 		  dl_3D=glGenLists(1);
 	  	  if (!ctlVectorSpline.empty()){
 		  	solidsList.push_back(glGenLists(1));
 		  	glNewList(solidsList.back(), GL_COMPILE);
 		  		drawSolidSweep(ctlVectorSpline);
-			
 				//normalsTest(ctlVectorSpline);
                   	glEndList();
-			
 			ctlVectorSpline.clear();
 			drawPanelACurve();
 			target=solidsList.size()-1;
@@ -671,24 +743,22 @@ void keyboard (unsigned char key, int x, int y)
 		  break;
 
 	  case '3':
-/*		  superficieBezier =! superficieBezier;
-		  glutPostRedisplay();
-		  break;
-*/		  
+
 		dl_3D=glGenLists(1);
 	
-		if ( 1 ){ //TODO:Condición de curva no nula.
+		if ( !controlBezier.empty() ){
 			solidsList.push_back(glGenLists(1));
 		  	glNewList(solidsList.back(), GL_COMPILE);
 		  		drawSolidRevolution();
-				//normalsTest(ctlVectorSpline);
-                  	glEndList();
-			
-			//ctlVectorSpline.clear(); //TODO:Limpiar Curva
-			//drawPanelBCurve();
+		  	glEndList();
+		  	cuentaTramos = 0;
+		  	contControl=0;
+		  	primera=false;
+			controlBezier.clear();
+			curvaBezier();
 			target=solidsList.size()-1;
 		  }
-              	glutPostRedisplay();
+		glutPostRedisplay();
 		  break;
 
 	  case '1':
@@ -698,6 +768,24 @@ void keyboard (unsigned char key, int x, int y)
 	  case '2':
 		  edit_panelB = !edit_panelB;
 		  glutPostRedisplay();
+		  break;
+	  case '5':
+		  textureRepeatX++;
+		  printf("Horizontal : %i\n",textureRepeatX);
+		  break;
+	  case '6':
+		  if(textureRepeatX>1)
+	  		  textureRepeatX--;
+		  printf("Horizontal : %i\n",textureRepeatX);
+		  break;
+	  case '7':
+		  textureRepeatY++;
+		  printf("Vertical : %i\n",textureRepeatY);
+		  break;
+	  case 'y':
+		  if(textureRepeatY>1)
+			  textureRepeatY--;
+		  printf("Vertical : %i\n",textureRepeatY);
 		  break;
 	  case '8':
 		  if (animation == true)
