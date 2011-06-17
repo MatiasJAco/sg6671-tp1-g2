@@ -74,7 +74,7 @@ GLuint dl_handle;
 #define TOP_VIEWB_H		((int)((float)W_HEIGHT*0.35f))
 
 //TEXTURA
-
+/*
 void makeCheckImage(void)
 {
    int i, j, c;
@@ -89,7 +89,46 @@ void makeCheckImage(void)
       }
    }
 }
+*/
 
+void makeCheckImage(void)
+{
+   int i, j, c;
+
+   for (i = 0; i < checkImageHeight; i++) {
+      for (j = 0; j < checkImageWidth; j++) {
+         c = ((((i&0x8)==0)^((j&0x8))==0))*255;
+         if ((i&0x8)==0){
+                if ((j&0x8)==0){
+                 checkImage[i][j][0] = (GLubyte) 0;
+                 checkImage[i][j][1] = (GLubyte) 0;
+                 checkImage[i][j][2] = (GLubyte) 0;
+                 checkImage[i][j][3] = (GLubyte) 255;
+      }
+        else{
+         checkImage[i][j][0] = (GLubyte) 0;
+         checkImage[i][j][1] = (GLubyte) 0;
+         checkImage[i][j][2] = (GLubyte) 255;
+         checkImage[i][j][3] = (GLubyte) 255;
+      }
+        }
+        else{
+        if ((j&0x8)==0){
+         checkImage[i][j][0] = (GLubyte) 255;
+         checkImage[i][j][1] = (GLubyte) 0;
+         checkImage[i][j][2] = (GLubyte) 0;
+         checkImage[i][j][3] = (GLubyte) 255;
+   }
+        else{
+         checkImage[i][j][0] = (GLubyte) 255;
+         checkImage[i][j][1] = (GLubyte) 255;
+         checkImage[i][j][2] = (GLubyte) 255;
+         checkImage[i][j][3] = (GLubyte) 255;
+}
+}
+}
+}
+}
 /*void OnIdle (void)
 {
 	rotate += 0.1;
