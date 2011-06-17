@@ -32,5 +32,8 @@ float z;
 
 void dibujaSupBezier(tVertice* ptosControl, float paso, float angulo, int tramos);
 tPunto calcularPuntoDeBezier(float u, tVertice* ptsControl);
+tPunto calcularNormal(float u, tVertice* ptsControl, tPunto planoNormal );
+tPunto rotarPunto(float alpha, tPunto p);
+
 
 #endif /* BEZIER_H_ */

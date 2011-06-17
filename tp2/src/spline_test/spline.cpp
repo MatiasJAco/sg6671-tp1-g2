@@ -208,9 +208,6 @@ vector<float> calcularPuntosSplineEquiespaciados2D(vector<float> & controlPoints
 			else
 				cotaSuperior=auxVector;
 
-		cout << "recalculo " << iteraciones << ',' << auxVector[0] <<',' << auxVector[1] <<',' << auxVector[2] << endl;
-		cout << "delta puntos " << distancia2D(cotaInferior,cotaSuperior) << endl;
-		cout << "distancias " << dAux+paso << ',' << dAux << endl;
 
 		}while( fabsf(dAux) > tolerancia && iteraciones++ < ITERACIONES_LIMITE);
 
@@ -218,7 +215,7 @@ vector<float> calcularPuntosSplineEquiespaciados2D(vector<float> & controlPoints
 		//Guardo los valores.
 		outputVector.push_back(auxVector[0]);
 		outputVector.push_back(auxVector[1]);
-		cout << ">>>>>>" << auxVector[0] <<',' << auxVector[1] << endl;
+
 
 
 	
